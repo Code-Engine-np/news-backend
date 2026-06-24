@@ -18,9 +18,9 @@ describe('AppController (e2e)', () => {
 
   it('/ (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/api')
       .expect(200)
-      .expect('Hello World!');
+      .expect({ status: 'ok', message: 'News backend is running' });
   });
 
   afterEach(async () => {

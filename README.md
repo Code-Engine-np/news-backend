@@ -23,13 +23,22 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+News backend built with NestJS, PostgreSQL, TypeORM, JWT auth, and role-based access control for admin, editor, and viewer users.
 
 ## Project setup
 
 ```bash
 $ pnpm install
+$ cp .env.example .env
 ```
+
+## Run with Docker
+
+```bash
+$ docker compose up --build
+```
+
+The API will be available at `http://localhost:3000/api`.
 
 ## Compile and run the project
 
