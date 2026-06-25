@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsEnum,
@@ -8,17 +9,21 @@ import {
 import { Role } from '../../common/enums/role.enum';
 
 export class CreateUserDto {
+  @ApiProperty({ description: 'User email address' })
   @IsEmail()
   email!: string;
 
+  @ApiProperty({ description: 'User password', minLength: 8 })
   @IsString()
   @MinLength(8)
   password!: string;
 
+  @ApiProperty({ description: 'User full name' })
   @IsString()
   @MinLength(2)
   fullName!: string;
 
+  @ApiPropertyOptional({ enum: Role, description: 'User role' })
   @IsOptional()
   @IsEnum(Role)
   role?: Role;
