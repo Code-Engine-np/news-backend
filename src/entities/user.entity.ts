@@ -26,6 +26,13 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   passwordHash!: string;
 
+  @Index({ unique: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  googleId?: string | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  refreshTokenHash?: string | null;
+
   @Column({ type: 'enum', enum: Role, default: Role.VIEWER })
   role!: Role;
 

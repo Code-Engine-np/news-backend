@@ -5,6 +5,8 @@ A NestJS backend for a multilingual news site with PostgreSQL, TypeORM, JWT auth
 ## Features
 
 - JWT auth with `admin`, `editor`, and `viewer` roles
+- Refresh-token rotation with hashed server-side storage
+- Google login/signup via Passport.js OAuth2
 - Shared TypeORM entities for users, categories, tags, articles, comments, media, article views, article likes, and newsletter subscriptions
 - English and Nepali content fields for article data
 - Swagger API docs
@@ -38,7 +40,13 @@ Key variables:
 - `DB_SYNCHRONIZE` - TypeORM schema sync flag for local development
 - `DB_LOGGING` - enable TypeORM SQL logging
 - `JWT_SECRET` - JWT signing secret
-- `JWT_EXPIRES_IN` - JWT expiration time
+- `JWT_ACCESS_SECRET` - access token signing secret
+- `JWT_ACCESS_EXPIRES_IN` - access token expiration time
+- `JWT_REFRESH_SECRET` - refresh token signing secret
+- `JWT_REFRESH_EXPIRES_IN` - refresh token expiration time
+- `GOOGLE_CLIENT_ID` - Google OAuth client id
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+- `GOOGLE_CALLBACK_URL` - Google OAuth callback URL
 - `SEED_ADMIN_EMAIL` - initial admin email seed
 - `SEED_ADMIN_PASSWORD` - initial admin password seed
 
@@ -75,6 +83,10 @@ This starts:
 ### Auth
 
 - `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
+- `GET /api/auth/google`
+- `GET /api/auth/google/callback`
 - `GET /api/auth/me`
 
 ### Users
