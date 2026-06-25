@@ -3,6 +3,9 @@ import { NewsStatus } from '../../common/enums/news-status.enum';
 
 export class CreateArticleDto {
   @IsString()
+  categoryId!: string;
+
+  @IsString()
   @MinLength(3)
   slugEn!: string;
 

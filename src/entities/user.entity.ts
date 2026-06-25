@@ -2,13 +2,17 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  Index,
 } from 'typeorm';
 import { Role } from '../common/enums/role.enum';
-import { NewsArticle } from '../articles/news-article.entity';
+import { ArticleLike } from './article-like.entity';
+import { ArticleView } from './article-view.entity';
+import { Comment } from './comment.entity';
+import { Media } from './media.entity';
+import { NewsArticle } from './news-article.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -30,6 +34,18 @@ export class User {
 
   @OneToMany(() => NewsArticle, (article) => article.author)
   articles?: NewsArticle[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments?: Comment[];
+
+  @OneToMany(() => Media, (media) => media.uploader)
+  uploadedMedia?: Media[];
+
+  @OneToMany(() => ArticleView, (view) => view.user)
+  articleViews?: ArticleView[];
+
+  @OneToMany(() => ArticleLike, (like) => like.user)
+  articleLikes?: ArticleLike[];
 
   @CreateDateColumn()
   createdAt!: Date;

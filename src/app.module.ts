@@ -6,8 +6,18 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
 import { UsersModule } from './users/users.module';
-import { NewsArticle } from './articles/news-article.entity';
-import { User } from './users/user.entity';
+import {
+  ArticleLike,
+  ArticleTag,
+  ArticleView,
+  Category,
+  Comment,
+  Media,
+  NewsArticle,
+  NewsletterSubscription,
+  Tag,
+  User,
+} from './entities';
 
 @Module({
   imports: [
@@ -24,7 +34,18 @@ import { User } from './users/user.entity';
         username: configService.get<string>('DB_USER', 'news_user'),
         password: configService.get<string>('DB_PASSWORD', 'news_password'),
         database: configService.get<string>('DB_NAME', 'news_db'),
-        entities: [User, NewsArticle],
+        entities: [
+          User,
+          Category,
+          Tag,
+          ArticleTag,
+          Comment,
+          Media,
+          ArticleView,
+          ArticleLike,
+          NewsletterSubscription,
+          NewsArticle,
+        ],
         autoLoadEntities: true,
         synchronize:
           configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
