@@ -1,6 +1,7 @@
 import { CreateArticleDto } from './create-article.dto';
 
 export class UpdateArticleDto implements Partial<CreateArticleDto> {
+  categoryId?: string;
   slugEn?: string;
   slugNe?: string;
   titleEn?: string;

@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
-import { NewsArticle } from './news-article.entity';
+import { Category, NewsArticle } from '../entities';
 import { UsersService } from '../users/users.service';
 import { NewsStatus } from '../common/enums/news-status.enum';
 import { Role } from '../common/enums/role.enum';
@@ -17,6 +17,8 @@ export class ArticlesService {
   constructor(
     @InjectRepository(NewsArticle)
     private readonly articlesRepository: Repository<NewsArticle>,
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
     private readonly usersService: UsersService,
   ) {}
 
@@ -46,8 +48,16 @@ export class ArticlesService {
       throw new NotFoundException('Author not found');
     }
 
+    const category = await this.categoriesRepository.findOne({
+      where: { id: createArticleDto.categoryId },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
     const article = this.articlesRepository.create({
       ...createArticleDto,
+      category,
       author,
       status: createArticleDto.status ?? NewsStatus.DRAFT,
     });
@@ -68,7 +78,21 @@ export class ArticlesService {
       throw new ForbiddenException('You cannot edit this article');
     }
 
-    Object.assign(article, updateArticleDto);
+    const { categoryId, ...articleData } = updateArticleDto;
+    Object.assign(article, articleData);
+
+    if (categoryId) {
+      const category = await this.categoriesRepository.findOne({
+        where: { id: categoryId },
+      });
+
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+
+      article.category = category;
+    }
+
     return this.articlesRepository.save(article);
   }
 

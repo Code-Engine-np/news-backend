@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { hashPassword } from '../common/security/password-hash.util';
 import { Role } from '../common/enums/role.enum';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './user.entity';
+import { User } from '../entities';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
