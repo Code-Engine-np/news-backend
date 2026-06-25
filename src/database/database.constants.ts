@@ -1,0 +1,1 @@
+export const DEFAULT_PASSWORD_SALT_ROUNDS = 12;
