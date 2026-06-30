@@ -13,6 +13,7 @@ import {
   NewsArticle,
   Tag,
 } from '../entities';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import {
       ArticleLike,
     ]),
     UsersModule,
+    JwtModule.register({}),
   ],
   controllers: [ArticlesController],
   providers: [ArticlesService],

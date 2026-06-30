@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 import { NewsStatus } from '../../common/enums/news-status.enum';
 
-export class CreateArticleDto {
-  @ApiProperty({ description: 'Category identifier for the article' })
-  @IsString()
+export class CreateNewsArticleDto {
+  @ApiProperty({ description: 'Category ID for the article' })
+  @IsUUID()
   categoryId!: string;
 
   @ApiProperty({ description: 'English slug for the article' })

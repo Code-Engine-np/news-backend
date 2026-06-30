@@ -18,6 +18,13 @@ import {
   Tag,
   User,
 } from './entities';
+import { NewsArticlesModule } from './news-articles/news-articles.module';
+import { CategoriesModule } from './categories/categories.module';
+import { TagsModule } from './tags/tags.module';
+import { CommentsModule } from './comments/comments.module';
+import { ArticleViewsModule } from './article-views/article-views.module';
+import { ArticleLikesModule } from './article-likes/article-likes.module';
+import { NewsletterSubscriptionsModule } from './newsletter-subscriptions/newsletter-subscriptions.module';
 
 @Module({
   imports: [
@@ -56,6 +63,13 @@ import {
     AuthModule,
     UsersModule,
     ArticlesModule,
+    NewsArticlesModule,
+    CategoriesModule,
+    TagsModule,
+    CommentsModule,
+    ArticleViewsModule,
+    ArticleLikesModule,
+    NewsletterSubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

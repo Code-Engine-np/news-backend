@@ -1,22 +1,18 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateArticleDto } from './dto/create-article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
+import { CreateNewsArticleDto } from './dto/create-news-article.dto';
+import { UpdateNewsArticleDto } from './dto/update-news-article.dto';
 import { ArticleTag, Category, NewsArticle, Tag } from '../entities';
 import { UsersService } from '../users/users.service';
 import { NewsStatus } from '../common/enums/news-status.enum';
 import { Role } from '../common/enums/role.enum';
 
 @Injectable()
-export class ArticlesService {
+export class NewsArticlesService {
   constructor(
     @InjectRepository(NewsArticle)
-    private readonly articlesRepository: Repository<NewsArticle>,
+    private readonly newsArticlesRepository: Repository<NewsArticle>,
     @InjectRepository(Category)
     private readonly categoriesRepository: Repository<Category>,
     @InjectRepository(Tag)
@@ -27,53 +23,63 @@ export class ArticlesService {
   ) {}
 
   findAll() {
-    return this.articlesRepository.find({ order: { createdAt: 'DESC' } });
+    return this.newsArticlesRepository.find({
+      order: { createdAt: 'DESC' },
+      relations: ['author', 'category', 'articleTags', 'articleTags.tag'],
+    });
   }
 
   findPublished() {
-    return this.articlesRepository.find({
+    return this.newsArticlesRepository.find({
       where: { status: NewsStatus.PUBLISHED },
       order: { createdAt: 'DESC' },
+      relations: ['author', 'category', 'articleTags', 'articleTags.tag'],
     });
   }
 
   async findOne(id: string) {
-    const article = await this.articlesRepository.findOne({ where: { id } });
+    const article = await this.newsArticlesRepository.findOne({
+      where: { id },
+      relations: ['author', 'category', 'articleTags', 'articleTags.tag', 'comments', 'likes', 'views'],
+    });
     if (!article) {
       throw new NotFoundException('Article not found');
     }
-
     return article;
   }
 
-  async create(createArticleDto: CreateArticleDto, authorId: string) {
+  async create(dto: CreateNewsArticleDto, authorId: string) {
     const author = await this.usersService.findById(authorId);
     if (!author) {
       throw new NotFoundException('Author not found');
     }
 
     const category = await this.categoriesRepository.findOne({
-      where: { id: createArticleDto.categoryId },
+      where: { id: dto.categoryId },
     });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
-    const article = this.articlesRepository.create({
-      ...createArticleDto,
+    const { tagIds, ...articleData } = dto;
+
+    const article = this.newsArticlesRepository.create({
+      ...articleData,
       category,
       author,
-      status: createArticleDto.status ?? NewsStatus.DRAFT,
+      status: dto.status ?? NewsStatus.DRAFT,
     });
 
-    return this.articlesRepository.save(article);
+    const saved = await this.newsArticlesRepository.save(article);
+
+    if (tagIds && tagIds.length > 0) {
+      await this.attachTags(saved, tagIds);
+    }
+
+    return this.findOne(saved.id);
   }
 
-  async update(
-    id: string,
-    updateArticleDto: UpdateArticleDto,
-    actor: { id: string; role: Role },
-  ) {
+  async update(id: string, dto: UpdateNewsArticleDto, actor: { id: string; role: Role }) {
     const article = await this.findOne(id);
 
     const canManageAll = actor.role === Role.ADMIN;
@@ -82,22 +88,29 @@ export class ArticlesService {
       throw new ForbiddenException('You cannot edit this article');
     }
 
-    const { categoryId, ...articleData } = updateArticleDto;
+    const { tagIds, categoryId, ...articleData } = dto;
     Object.assign(article, articleData);
 
     if (categoryId) {
       const category = await this.categoriesRepository.findOne({
         where: { id: categoryId },
       });
-
       if (!category) {
         throw new NotFoundException('Category not found');
       }
-
       article.category = category;
     }
 
-    return this.articlesRepository.save(article);
+    await this.newsArticlesRepository.save(article);
+
+    if (tagIds !== undefined) {
+      await this.articleTagsRepository.delete({ article: { id } });
+      if (tagIds.length > 0) {
+        await this.attachTags(article, tagIds);
+      }
+    }
+
+    return this.findOne(id);
   }
 
   async remove(id: string, actor: { id: string; role: Role }) {
@@ -109,7 +122,15 @@ export class ArticlesService {
       throw new ForbiddenException('You cannot delete this article');
     }
 
-    await this.articlesRepository.remove(article);
+    await this.newsArticlesRepository.remove(article);
     return { deleted: true };
+  }
+
+  private async attachTags(article: NewsArticle, tagIds: string[]) {
+    const tags = await this.tagsRepository.findByIds(tagIds);
+    const articleTags = tags.map((tag) =>
+      this.articleTagsRepository.create({ article, tag }),
+    );
+    await this.articleTagsRepository.save(articleTags);
   }
 }
