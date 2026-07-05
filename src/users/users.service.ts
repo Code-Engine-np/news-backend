@@ -2,10 +2,10 @@ import { ConflictException, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { hashPassword } from '../common/security/password-hash.util';
-import { Role } from '../common/enums/role.enum';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from '../entities';
+import { User } from '@/entities';
+import { hashPassword } from '@/common/security/password-hash.util';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { Role } from '@/common/enums/role.enum';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -55,6 +55,35 @@ export class UsersService implements OnModuleInit {
     return this.usersRepository.save(user);
   }
 
+  async createGoogleUser(input: {
+    email: string;
+    fullName: string;
+    googleId: string;
+  }): Promise<User> {
+    const existingUser = await this.findByEmail(input.email);
+    if (existingUser) {
+      if (!existingUser.googleId) {
+        existingUser.googleId = input.googleId;
+      }
+
+      if (!existingUser.fullName) {
+        existingUser.fullName = input.fullName;
+      }
+
+      return this.usersRepository.save(existingUser);
+    }
+
+    const user = this.usersRepository.create({
+      email: input.email.toLowerCase(),
+      passwordHash: hashPassword(`${input.googleId}:${input.email}`),
+      fullName: input.fullName,
+      role: Role.VIEWER,
+      googleId: input.googleId,
+    });
+
+    return this.usersRepository.save(user);
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email: email.toLowerCase() },
@@ -63,6 +92,17 @@ export class UsersService implements OnModuleInit {
 
   async findById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { googleId } });
+  }
+
+  async updateRefreshTokenHash(
+    userId: string,
+    refreshTokenHash: string | null,
+  ): Promise<void> {
+    await this.usersRepository.update(userId, { refreshTokenHash });
   }
 
   async findAll(): Promise<User[]> {

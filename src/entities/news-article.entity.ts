@@ -1,3 +1,11 @@
+import { NewsStatus } from '@/common/enums/news-status.enum';
+import { ArticleLike } from '@/entities/article-like.entity';
+import { ArticleTag } from '@/entities/article-tag.entity';
+import { ArticleView } from '@/entities/article-view.entity';
+import { Category } from '@/entities/category.entity';
+import { Comment } from '@/entities/comment.entity';
+import { Media } from '@/entities/media.entity';
+import { User } from '@/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,14 +17,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { NewsStatus } from '../common/enums/news-status.enum';
-import { ArticleLike } from './article-like.entity';
-import { ArticleTag } from './article-tag.entity';
-import { ArticleView } from './article-view.entity';
-import { Category } from './category.entity';
-import { Comment } from './comment.entity';
-import { Media } from './media.entity';
-import { User } from './user.entity';
 
 @Entity({ name: 'news_articles' })
 export class NewsArticle {

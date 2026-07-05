@@ -5,12 +5,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateArticleDto } from './dto/create-article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
-import { Category, NewsArticle } from '../entities';
-import { UsersService } from '../users/users.service';
-import { NewsStatus } from '../common/enums/news-status.enum';
-import { Role } from '../common/enums/role.enum';
+import { NewsArticle } from '@/entities/news-article.entity';
+import { Category } from '@/entities/category.entity';
+import { Tag } from '@/entities/tag.entity';
+import { ArticleTag } from '@/entities/article-tag.entity';
+import { Role } from '@/common/enums/role.enum';
+import { CreateArticleDto } from '@/articles/dto/create-article.dto';
+import { NewsStatus } from '@/common/enums/news-status.enum';
+import { UsersService } from '@/users/users.service';
+import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
 
 @Injectable()
 export class ArticlesService {
@@ -19,6 +22,10 @@ export class ArticlesService {
     private readonly articlesRepository: Repository<NewsArticle>,
     @InjectRepository(Category)
     private readonly categoriesRepository: Repository<Category>,
+    @InjectRepository(Tag)
+    private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(ArticleTag)
+    private readonly articleTagsRepository: Repository<ArticleTag>,
     private readonly usersService: UsersService,
   ) {}
 

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 import { NewsStatus } from '../../common/enums/news-status.enum';
 
 export class CreateArticleDto {
@@ -45,4 +45,10 @@ export class CreateArticleDto {
   @IsOptional()
   @IsEnum(NewsStatus)
   status?: NewsStatus;
+
+  @ApiPropertyOptional({ description: 'Tag IDs to attach to the article', isArray: true, type: 'string' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('all', { each: true })
+  tagIds?: string[];
 }

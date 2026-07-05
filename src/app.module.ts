@@ -1,11 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { ArticlesModule } from './articles/articles.module';
-import { UsersModule } from './users/users.module';
+
 import {
   ArticleLike,
   ArticleTag,
@@ -18,6 +14,18 @@ import {
   Tag,
   User,
 } from './entities';
+import { NewsArticlesModule } from './news-articles/news-articles.module';
+import { CategoriesModule } from './categories/categories.module';
+import { TagsModule } from './tags/tags.module';
+import { CommentsModule } from './comments/comments.module';
+import { ArticleViewsModule } from './article-views/article-views.module';
+import { ArticleLikesModule } from './article-likes/article-likes.module';
+import { NewsletterSubscriptionsModule } from './newsletter-subscriptions/newsletter-subscriptions.module';
+import { ArticlesModule } from '@/articles/articles.module';
+import { UsersModule } from '@/users/users.module';
+import { AuthModule } from '@/auth/auth.module';
+import { AppController } from '@/app.controller';
+import { AppService } from '@/app.service';
 
 @Module({
   imports: [
@@ -56,6 +64,13 @@ import {
     AuthModule,
     UsersModule,
     ArticlesModule,
+    NewsArticlesModule,
+    CategoriesModule,
+    TagsModule,
+    CommentsModule,
+    ArticleViewsModule,
+    ArticleLikesModule,
+    NewsletterSubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
