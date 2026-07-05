@@ -1,9 +1,9 @@
+import { Role } from '@/common/enums/role.enum';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Role } from '../common/enums/role.enum';
 
 type JwtPayload = {
   sub: string;

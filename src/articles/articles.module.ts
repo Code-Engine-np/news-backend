@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ArticlesController } from './articles.controller';
-import { ArticlesService } from './articles.service';
-import { UsersModule } from '../users/users.module';
+import { JwtModule } from '@nestjs/jwt';
 import {
   ArticleLike,
   ArticleTag,
@@ -12,8 +10,10 @@ import {
   Media,
   NewsArticle,
   Tag,
-} from '../entities';
-import { JwtModule } from '@nestjs/jwt';
+} from '@/entities';
+import { UsersModule } from '@/users/users.module';
+import { ArticlesController } from '@/articles/articles.controller';
+import { ArticlesService } from '@/articles/articles.service';
 
 @Module({
   imports: [

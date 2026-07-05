@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -7,9 +15,9 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CommentsService } from '@/comments/comments.service';
+import { CreateCommentDto } from '@/comments/dto/create-comment.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 @ApiTags('comments')
 @Controller('comments')
@@ -29,7 +37,10 @@ export class CommentsController {
   @ApiOperation({ summary: 'Create a comment on an article' })
   @ApiCreatedResponse({ description: 'Returns the created comment.' })
   @UseGuards(JwtAuthGuard)
-  create(@Body() dto: CreateCommentDto, @Req() request: { user: { id: string } }) {
+  create(
+    @Body() dto: CreateCommentDto,
+    @Req() request: { user: { id: string } },
+  ) {
     return this.commentsService.create(dto, request.user.id);
   }
 }

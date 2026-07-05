@@ -1,6 +1,6 @@
+import { NewsArticle } from '@/entities/news-article.entity';
+import { Tag } from '@/entities/tag.entity';
 import { Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import { NewsArticle } from './news-article.entity';
-import { Tag } from './tag.entity';
 
 @Entity({ name: 'article_tags' })
 @Unique(['article', 'tag'])

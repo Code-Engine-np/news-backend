@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NewsletterSubscriptionsController } from './newsletter-subscriptions.controller';
-import { NewsletterSubscriptionsService } from './newsletter-subscriptions.service';
-import { NewsletterSubscription } from '../entities';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '@/users/users.module';
+import { NewsletterSubscription } from '@/entities';
+import { NewsletterSubscriptionsController } from '@/newsletter-subscriptions/newsletter-subscriptions.controller';
+import { NewsletterSubscriptionsService } from '@/newsletter-subscriptions/newsletter-subscriptions.service';
 
 @Module({
   imports: [

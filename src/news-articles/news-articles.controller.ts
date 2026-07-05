@@ -1,3 +1,10 @@
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/enums/role.enum';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { CreateNewsArticleDto } from '@/news-articles/dto/create-news-article.dto';
+import { UpdateNewsArticleDto } from '@/news-articles/dto/update-news-article.dto';
+import { NewsArticlesService } from '@/news-articles/news-articles.service';
 import {
   Body,
   Controller,
@@ -17,13 +24,6 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { NewsArticlesService } from './news-articles.service';
-import { CreateNewsArticleDto } from './dto/create-news-article.dto';
-import { UpdateNewsArticleDto } from './dto/update-news-article.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../common/enums/role.enum';
 
 @ApiTags('news-articles')
 @Controller('news-articles')

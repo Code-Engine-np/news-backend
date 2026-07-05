@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -6,8 +6,8 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { ArticleLikesService } from './article-likes.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ArticleLikesService } from '@/article-likes/article-likes.service';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 @ApiTags('article-likes')
 @Controller('article-likes')

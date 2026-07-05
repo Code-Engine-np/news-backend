@@ -2,10 +2,10 @@ import { ConflictException, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { hashPassword } from '../common/security/password-hash.util';
-import { Role } from '../common/enums/role.enum';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from '../entities';
+import { User } from '@/entities';
+import { hashPassword } from '@/common/security/password-hash.util';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { Role } from '@/common/enums/role.enum';
 
 @Injectable()
 export class UsersService implements OnModuleInit {

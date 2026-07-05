@@ -17,14 +17,13 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { ArticlesService } from './articles.service';
-import { CreateArticleDto } from './dto/create-article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../common/enums/role.enum';
-
+import { ArticlesService } from '@/articles/articles.service';
+import { CreateArticleDto } from '@/articles/dto/create-article.dto';
+import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Role } from '@/common/enums/role.enum';
+import { Roles } from '@/common/decorators/roles.decorator';
 @ApiTags('articles')
 @Controller('articles')
 export class ArticlesController {
