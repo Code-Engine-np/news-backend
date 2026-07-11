@@ -14,6 +14,7 @@ import {
 import { UsersModule } from '@/users/users.module';
 import { ArticlesController } from '@/articles/articles.controller';
 import { ArticlesService } from '@/articles/articles.service';
+import { CategoriesModule } from '@/categories/categories.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ArticlesService } from '@/articles/articles.service';
       ArticleView,
       ArticleLike,
     ]),
+    CategoriesModule,
     UsersModule,
     JwtModule.register({}),
   ],

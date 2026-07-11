@@ -24,29 +24,29 @@ export class NewsArticle {
   id!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 220 })
+  @Column({ type: 'varchar', length: 220, nullable: true })
   slugEn!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 220 })
+  @Column({ type: 'varchar', length: 220, nullable: true })
   slugNe!: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   titleEn!: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   titleNe!: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   summaryEn!: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   summaryNe!: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   contentEn!: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   contentNe!: string;
 
   @Column({ type: 'enum', enum: NewsStatus, default: NewsStatus.DRAFT })

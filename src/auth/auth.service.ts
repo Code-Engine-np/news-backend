@@ -141,8 +141,10 @@ export class AuthService {
     );
 
     return {
-      accessToken,
-      refreshToken,
+      AuthTokens: {
+        accessToken,
+        refreshToken,
+      },
       user: {
         id: user.id,
         email: user.email,

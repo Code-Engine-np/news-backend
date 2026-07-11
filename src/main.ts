@@ -7,6 +7,10 @@ import { AppModule } from '@/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  });
 
   // Parse cookies (including refresh-token cookie)
   app.use(cookieParser());

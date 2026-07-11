@@ -14,6 +14,9 @@ import { CreateArticleDto } from '@/articles/dto/create-article.dto';
 import { NewsStatus } from '@/common/enums/news-status.enum';
 import { UsersService } from '@/users/users.service';
 import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
+// import slug from 'slug';
+import slug from 'slug';
+import { CategoriesService } from '@/categories/categories.service';
 
 @Injectable()
 export class ArticlesService {
@@ -27,6 +30,8 @@ export class ArticlesService {
     @InjectRepository(ArticleTag)
     private readonly articleTagsRepository: Repository<ArticleTag>,
     private readonly usersService: UsersService,
+
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   findAll() {
@@ -55,11 +60,18 @@ export class ArticlesService {
       throw new NotFoundException('Author not found');
     }
 
-    const category = await this.categoriesRepository.findOne({
+    let category: Category | null = await this.categoriesRepository.findOne({
       where: { id: createArticleDto.categoryId },
     });
     if (!category) {
-      throw new NotFoundException('Category not found');
+      // if the category does not exist, create a new one with the provided name
+      const slugfied: string = slug(createArticleDto.category, {
+        lower: true,
+      });
+      category = await this.categoriesService.create({
+        slug: slugfied,
+        nameNe: createArticleDto.category,
+      });
     }
 
     const article = this.articlesRepository.create({

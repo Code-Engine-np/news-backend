@@ -5,17 +5,17 @@ export class CreateCategoryDto {
   @ApiProperty({ description: 'Unique URL slug for the category' })
   @IsString()
   @MinLength(1)
-  slug!: string;
+  slug?: string;
 
   @ApiProperty({ description: 'Category name in English' })
   @IsString()
   @MinLength(1)
-  nameEn!: string;
+  nameEn?: string;
 
   @ApiProperty({ description: 'Category name in Nepali' })
   @IsString()
   @MinLength(1)
-  nameNe!: string;
+  nameNe?: string;
 
   @ApiPropertyOptional({ description: 'English description' })
   @IsOptional()

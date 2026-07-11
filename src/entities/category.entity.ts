@@ -18,11 +18,11 @@ export class Category {
   @Column({ type: 'varchar', length: 120 })
   slug!: string;
 
-  @Column({ type: 'varchar', length: 160 })
-  nameEn!: string;
+  @Column({ type: 'varchar', length: 160, nullable: true })
+  nameEn?: string;
 
-  @Column({ type: 'varchar', length: 160 })
-  nameNe!: string;
+  @Column({ type: 'varchar', length: 160, nullable: true })
+  nameNe?: string;
 
   @Column({ type: 'text', nullable: true })
   descriptionEn?: string | null;
