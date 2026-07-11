@@ -1,14 +1,15 @@
+import { GoogleProfileDto } from '@/auth/dto/google-profile.dto';
+import { LoginDto } from '@/auth/dto/login.dto';
+import { RefreshTokenDto } from '@/auth/dto/refresh-token.dto';
+import { Role } from '@/common/enums/role.enum';
+import { AppConfig } from '@/common/interfaces/env.interface';
+import { verifyPassword } from '@/common/security/password-hash.util';
+import { hashToken, verifyToken } from '@/common/security/token-hash.util';
+import { User } from '@/entities';
+import { UsersService } from '@/users/users.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { verifyPassword } from '../common/security/password-hash.util';
-import { hashToken, verifyToken } from '../common/security/token-hash.util';
-import { GoogleProfileDto } from './dto/google-profile.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
-import { User } from '../entities';
-import { Role } from '../common/enums/role.enum';
 
 type TokenPayload = {
   sub: string;
@@ -48,7 +49,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<AppConfig, true>,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -111,26 +112,19 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>(
-        'JWT_ACCESS_SECRET',
-        this.configService.get<string>(
-          'JWT_SECRET',
-          'dev_jwt_secret_change_me',
-        ),
-      ),
+      secret: this.configService.get('JWT_ACCESS_SECRET', { infer: true }),
       expiresIn: parseDurationToSeconds(
-        this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
+        this.configService.get('JWT_ACCESS_EXPIRES_IN', { infer: true }),
         15 * 60,
       ),
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>(
-        'JWT_REFRESH_SECRET',
-        'dev_refresh_secret_change_me',
-      ),
+      secret: this.configService.get('JWT_REFRESH_SECRET', { infer: true }),
       expiresIn: parseDurationToSeconds(
-        this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
+        this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', {
+          infer: true,
+        }),
         7 * 24 * 60 * 60,
       ),
     });
@@ -157,10 +151,9 @@ export class AuthService {
   private async verifyRefreshToken(token: string) {
     try {
       return await this.jwtService.verifyAsync<TokenPayload>(token, {
-        secret: this.configService.get<string>(
-          'JWT_REFRESH_SECRET',
-          'dev_refresh_secret_change_me',
-        ),
+        secret: this.configService.get('JWT_REFRESH_SECRET', {
+          infer: true,
+        }),
       });
     } catch {
       throw new UnauthorizedException('Invalid refresh token');

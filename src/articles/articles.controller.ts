@@ -24,16 +24,30 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Role } from '@/common/enums/role.enum';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 @ApiTags('articles')
 @Controller('articles')
 export class ArticlesController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(
+    private readonly articlesService: ArticlesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('published')
   @ApiOperation({ summary: 'List published articles' })
   @ApiOkResponse({ description: 'Returns published articles.' })
   findPublished() {
     return this.articlesService.findPublished();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.EDITOR)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get Cloudinary upload signature' })
+  @ApiOkResponse({ description: 'Returns Cloudinary upload signature.' })
+  @Get('upload-signature')
+  getUploadSignature() {
+    return this.cloudinaryService.generateSignature();
   }
 
   @Get()

@@ -15,6 +15,7 @@ import { UsersModule } from '@/users/users.module';
 import { ArticlesController } from '@/articles/articles.controller';
 import { ArticlesService } from '@/articles/articles.service';
 import { CategoriesModule } from '@/categories/categories.module';
+import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 
 @Module({
   imports: [
@@ -30,9 +31,10 @@ import { CategoriesModule } from '@/categories/categories.module';
     ]),
     CategoriesModule,
     UsersModule,
+
     JwtModule.register({}),
   ],
   controllers: [ArticlesController],
-  providers: [ArticlesService],
+  providers: [ArticlesService, CloudinaryService],
 })
 export class ArticlesModule {}
