@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { NewsArticle } from '@/entities/news-article.entity';
 import { Category } from '@/entities/category.entity';
 import { Tag } from '@/entities/tag.entity';
@@ -14,9 +14,9 @@ import { CreateArticleDto } from '@/articles/dto/create-article.dto';
 import { NewsStatus } from '@/common/enums/news-status.enum';
 import { UsersService } from '@/users/users.service';
 import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
-// import slug from 'slug';
 import slug from 'slug';
 import { CategoriesService } from '@/categories/categories.service';
+import { Image } from '@/entities';
 
 @Injectable()
 export class ArticlesService {
@@ -27,26 +27,89 @@ export class ArticlesService {
     private readonly categoriesRepository: Repository<Category>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(Image)
+    private readonly imagesRepository: Repository<Image>,
     @InjectRepository(ArticleTag)
-    private readonly articleTagsRepository: Repository<ArticleTag>,
     private readonly usersService: UsersService,
+
+    private readonly dataSource: DataSource,
 
     private readonly categoriesService: CategoriesService,
   ) {}
 
   findAll() {
-    return this.articlesRepository.find({ order: { createdAt: 'DESC' } });
+    return this.articlesRepository.find({
+      order: { createdAt: 'DESC' },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        category: true,
+        author: {
+          id: true,
+          fullName: true,
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+      relations: ['category', 'author'],
+    });
   }
 
   findPublished() {
     return this.articlesRepository.find({
       where: { status: NewsStatus.PUBLISHED },
       order: { createdAt: 'DESC' },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        images: true,
+        summary: true,
+        comments: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          id: true,
+          fullName: true,
+        },
+        category: true,
+      },
     });
   }
 
   async findOne(id: string) {
-    const article = await this.articlesRepository.findOne({ where: { id } });
+    const article = await this.articlesRepository.findOne({
+      where: { id },
+    });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    return article;
+  }
+
+  async findOneBySlug(slug: string) {
+    const article = await this.articlesRepository.findOne({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        images: true,
+        summary: true,
+        comments: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          id: true,
+          fullName: true,
+        },
+        category: true,
+      },
+      relations: ['category', 'author'],
+    });
     if (!article) {
       throw new NotFoundException('Article not found');
     }
@@ -55,7 +118,7 @@ export class ArticlesService {
   }
 
   async create(createArticleDto: CreateArticleDto, authorId: string) {
-    const author = await this.usersService.findById(authorId);
+   · const author = await this.usersService.findById(authorId);
     if (!author) {
       throw new NotFoundException('Author not found');
     }
@@ -74,14 +137,35 @@ export class ArticlesService {
       });
     }
 
-    const article = this.articlesRepository.create({
-      ...createArticleDto,
-      category,
-      author,
-      status: createArticleDto.status ?? NewsStatus.DRAFT,
-    });
+    const slugifiedTitle = slug(createArticleDto.title, { lower: true });
+    return this.dataSource.transaction(async (manager) => {
+      const article = manager.create(NewsArticle, {
+        ...createArticleDto,
+        slug: slugifiedTitle,
+        author,
+        category,
+        status: createArticleDto.status ?? NewsStatus.DRAFT,
+        images: [],
+      });
+      const savedArticle = await manager.save(article);
 
-    return this.articlesRepository.save(article);
+      if (createArticleDto.images?.length) {
+        const images = createArticleDto.images.map((img) =>
+          manager.create(Image, {
+            secureUrl: img.secure_url,
+            publicId: img.public_id,
+            resourceType: img.resource_type,
+            altText: img.alt_text,
+            articleId: savedArticle.id,
+          }),
+        );
+        await manager.save(Image, images);
+      }
+      return manager.findOne(NewsArticle, {
+        where: { id: savedArticle.id },
+        relations: ['category', 'author', 'images'],
+      });
+    });
   }
 
   async update(

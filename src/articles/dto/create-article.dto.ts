@@ -1,14 +1,15 @@
+import { CloudinaryImageDto } from '@/articles/dto/cloudinary-image.dto';
 import { NewsStatus } from '@/common/enums/news-status.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
   IsOptional,
   IsString,
   IsUUID,
-  MinLength,
+  ValidateNested,
 } from 'class-validator';
-// import { NewsStatus } from '../../common/enums/news-status.enum';
 
 export class CreateArticleDto {
   @ApiPropertyOptional({
@@ -23,38 +24,32 @@ export class CreateArticleDto {
   @IsString()
   category!: string;
 
-  // @ApiProperty({ description: 'English slug for the article' })
-  // @IsString()
-  // @MinLength(3)
-  // slugEn!: string;
-  @ApiProperty({ description: 'Nepali slug for the article' })
-  @IsString()
-  @MinLength(3)
-  slugNe!: string;
-
-  // @ApiProperty({ description: 'English title for the article' })
-  // @IsString()
-  // titleEn!: string;
-
   @ApiProperty({ description: 'Nepali title for the article' })
   @IsString()
-  titleNe!: string;
-
-  // @ApiProperty({ description: 'English summary for the article' })
-  // @IsString()
-  // summaryEn!: string;
+  title!: string;
 
   @ApiProperty({ description: 'Nepali summary for the article' })
   @IsString()
-  summaryNe!: string;
-
-  // @ApiProperty({ description: 'English article content' })
-  // @IsString()
-  // contentEn!: string;
+  summary!: string;
 
   @ApiProperty({ description: 'Nepali article content' })
   @IsString()
-  contentNe!: string;
+  content!: string;
+
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [];
+      }
+    }
+    return value; // already an array when sent as JSON body
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CloudinaryImageDto)
+  images!: CloudinaryImageDto[];
 
   @ApiPropertyOptional({ enum: NewsStatus, description: 'Publication status' })
   @IsOptional()

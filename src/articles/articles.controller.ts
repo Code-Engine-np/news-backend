@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -40,14 +41,24 @@ export class ArticlesController {
     return this.articlesService.findPublished();
   }
 
+  @Get('upload-signature')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.EDITOR)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get Cloudinary upload signature' })
   @ApiOkResponse({ description: 'Returns Cloudinary upload signature.' })
-  @Get('upload-signature')
   getUploadSignature() {
-    return this.cloudinaryService.generateSignature();
+    return this.cloudinaryService.generateUploadSignature();
+  }
+
+  @Get('delete-signature')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get Cloudinary delete signature' })
+  @ApiOkResponse({ description: 'Returns Cloudinary delete signature.' })
+  @Roles(Role.ADMIN, Role.EDITOR)
+  getDeleteSignature(@Query('publicId') publicId: string) {
+    return this.cloudinaryService.generateDeleteSignature(publicId);
   }
 
   @Get()
@@ -68,6 +79,14 @@ export class ArticlesController {
     return this.articlesService.findOne(id);
   }
 
+  @Get('slug/:slug')
+  @ApiParam({ name: 'slug', description: 'Article slug' })
+  @ApiOperation({ summary: 'Get a single article by slug' })
+  @ApiOkResponse({ description: 'Returns the requested article.' })
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.articlesService.findOneBySlug(slug);
+  }
+
   @Post()
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create a new article' })
@@ -78,6 +97,12 @@ export class ArticlesController {
     @Body() createArticleDto: CreateArticleDto,
     @Req() request: { user: { id: string } },
   ) {
+    console.log(
+      'Creating article with data:',
+      createArticleDto,
+      'by user:',
+      request.user.id,
+    );
     return this.articlesService.create(createArticleDto, request.user.id);
   }
 

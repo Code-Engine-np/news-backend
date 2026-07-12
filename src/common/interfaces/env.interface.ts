@@ -34,24 +34,31 @@ export class AppConfig {
   @IsString()
   GOOGLE_REDIRECT_URI!: string;
 
-  @IsString()
-  DB_HOST!: string;
+  // @IsString()
+  // DB_HOST!: string;
 
-  @IsNumber()
-  DB_PORT!: number;
+  // @IsNumber()
+  // DB_PORT!: number;
 
-  @IsString()
-  DB_USER!: string;
+  // @IsString()
+  // DB_USER!: string;
 
-  @IsString()
-  DB_PASSWORD!: string;
+  // @IsString()
+  // DB_PASSWORD!: string;
 
-  @IsString()
-  DB_NAME!: string;
+  // @IsString()
+  // DB_NAME!: string;
 
   @IsBoolean()
   DB_SYNCHRONIZE!: boolean;
 
   @IsBoolean()
   DB_LOGGING!: boolean;
+
+  // @IsBoolean()
+  // DB_SSL!: boolean;
+
+  // @IsBoolean()
+  // DB_SSL_REJECT_UNAUTHORIZED!: boolean;
+  DATABASE_URL!: string;
 }

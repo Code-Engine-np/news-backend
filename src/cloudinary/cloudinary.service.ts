@@ -19,7 +19,7 @@ export class CloudinaryService {
     });
   }
 
-  generateSignature(folder = 'Best_News_Assets') {
+  generateUploadSignature(folder = 'Best_News_Assets') {
     const timestamp = Math.round(Date.now() / 1000);
     const params = { timestamp, folder };
 
@@ -38,6 +38,28 @@ export class CloudinaryService {
         infer: true,
       }),
       folder,
+    };
+  }
+
+  generateDeleteSignature(publicId: string) {
+    const timestamp = Math.round(Date.now() / 1000);
+
+    // Must match exactly what you send in FormData
+    const paramsToSign = { public_id: publicId, timestamp };
+
+    const signature = cloudinary.utils.api_sign_request(
+      paramsToSign,
+      this.configService.get('CLOUDINARY_API_SECRET', { infer: true }),
+    );
+
+    return {
+      timestamp,
+      signature,
+      publicId, // send back so frontend uses the exact same value
+      apiKey: this.configService.get('CLOUDINARY_API_KEY', { infer: true }),
+      cloudName: this.configService.get('CLOUDINARY_CLOUD_NAME', {
+        infer: true,
+      }),
     };
   }
 }

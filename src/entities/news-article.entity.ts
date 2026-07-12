@@ -1,10 +1,10 @@
 import { NewsStatus } from '@/common/enums/news-status.enum';
-import { ArticleLike } from '@/entities/article-like.entity';
+// import { ArticleLike } from '@/entities/article-like.entity';
 import { ArticleTag } from '@/entities/article-tag.entity';
-import { ArticleView } from '@/entities/article-view.entity';
+// import { ArticleView } from '@/entities/article-view.entity';
 import { Category } from '@/entities/category.entity';
 import { Comment } from '@/entities/comment.entity';
-import { Media } from '@/entities/media.entity';
+import { Image } from '@/entities/image.entity';
 import { User } from '@/entities/user.entity';
 import {
   Column,
@@ -24,30 +24,17 @@ export class NewsArticle {
   id!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 220, nullable: true })
-  slugEn!: string;
+  @Column({ type: 'varchar', length: 220 })
+  slug!: string;
 
-  @Index({ unique: true })
-  @Column({ type: 'varchar', length: 220, nullable: true })
-  slugNe!: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  titleEn!: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  titleNe!: string;
+  @Column({ type: 'varchar', length: 255 })
+  title!: string;
 
   @Column({ type: 'text', nullable: true })
-  summaryEn!: string;
+  summary!: string;
 
-  @Column({ type: 'text', nullable: true })
-  summaryNe!: string;
-
-  @Column({ type: 'text', nullable: true })
-  contentEn!: string;
-
-  @Column({ type: 'text', nullable: true })
-  contentNe!: string;
+  @Column({ type: 'text' })
+  content!: string;
 
   @Column({ type: 'enum', enum: NewsStatus, default: NewsStatus.DRAFT })
   status!: NewsStatus;
@@ -55,7 +42,7 @@ export class NewsArticle {
   @ManyToOne(() => User, (author) => author.articles, {
     eager: true,
     nullable: false,
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   author!: User;
 
@@ -67,20 +54,17 @@ export class NewsArticle {
   @JoinColumn({ name: 'categoryId' })
   category!: Category;
 
+  @OneToMany(() => Image, (image) => image.article, {
+    cascade: true, // saving article also saves images
+    eager: false,
+  })
+  images!: Image[];
+
   @OneToMany(() => ArticleTag, (articleTag) => articleTag.article)
   articleTags?: ArticleTag[];
 
   @OneToMany(() => Comment, (comment) => comment.article)
   comments?: Comment[];
-
-  @OneToMany(() => Media, (media) => media.article)
-  media?: Media[];
-
-  @OneToMany(() => ArticleView, (view) => view.article)
-  views?: ArticleView[];
-
-  @OneToMany(() => ArticleLike, (like) => like.article)
-  likes?: ArticleLike[];
 
   @CreateDateColumn()
   createdAt!: Date;

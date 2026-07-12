@@ -17,13 +17,17 @@ export async function configuration() {
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY!,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET!,
     // Database configuration
-    DB_HOST: process.env.DB_HOST!,
-    DB_PORT: Number(process.env.DB_PORT),
-    DB_USER: process.env.DB_USER!,
-    DB_PASSWORD: process.env.DB_PASSWORD!,
-    DB_NAME: process.env.DB_NAME!,
+    // DB_HOST: process.env.DB_HOST!,
+    // DB_PORT: Number(process.env.DB_PORT),
+    // DB_USER: process.env.DB_USER!,
+    // DB_PASSWORD: process.env.DB_PASSWORD!,
+    // DB_NAME: process.env.DB_NAME!,
     DB_SYNCHRONIZE: process.env.DB_SYNCHRONIZE === 'true' || false,
     DB_LOGGING: process.env.DB_LOGGING === 'true' || false,
+    // DB_SSL: process.env.DB_SSL === 'true' || false,
+    // DB_SSL_REJECT_UNAUTHORIZED:
+    //   process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true' || false,
+    DATABASE_URL: process.env.DATABASE_URL!,
 
     //Google OAuth configuration
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,

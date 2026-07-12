@@ -2,12 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import {
-  ArticleLike,
   ArticleTag,
-  ArticleView,
   Category,
   Comment,
-  Media,
+  Image,
   NewsArticle,
   Tag,
 } from '@/entities';
@@ -25,9 +23,7 @@ import { CloudinaryService } from '@/cloudinary/cloudinary.service';
       Tag,
       ArticleTag,
       Comment,
-      Media,
-      ArticleView,
-      ArticleLike,
+      Image,
     ]),
     CategoriesModule,
     UsersModule,
