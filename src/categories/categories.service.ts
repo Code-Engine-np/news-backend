@@ -16,33 +16,41 @@ export class CategoriesService {
     private readonly categoriesRepository: Repository<Category>,
   ) {}
 
+  private mapCategoryToApi(category: Category): any {
+    return {
+      id: category.id,
+      slug: category.slug,
+      name: category.nameNe || category.nameEn || '',
+      description: category.descriptionNe || category.descriptionEn || '',
+    };
+  }
+
   findAll() {
-    return this.categoriesRepository.find({
-      order: { createdAt: 'DESC' },
-      relations: ['articles'],
-    });
+    return this.categoriesRepository
+      .find({
+        order: { createdAt: 'DESC' },
+      })
+      .then((categories) => categories.map((c) => this.mapCategoryToApi(c)));
   }
 
   async findBySlug(slug: string) {
     const category = await this.categoriesRepository.findOne({
       where: { slug },
-      relations: ['articles'],
     });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-    return category;
+    return this.mapCategoryToApi(category);
   }
 
   async findOne(id: string) {
     const category = await this.categoriesRepository.findOne({
       where: { id },
-      relations: ['articles'],
     });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-    return category;
+    return this.mapCategoryToApi(category);
   }
 
   async create(dto: CreateCategoryDto) {

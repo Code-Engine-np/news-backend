@@ -1,5 +1,4 @@
 import { Role } from '@/common/enums/role.enum';
-import { Comment } from '@/entities/comment.entity';
 import { NewsArticle } from '@/entities/news-article.entity';
 import {
   Column,
@@ -38,9 +37,6 @@ export class User {
 
   @OneToMany(() => NewsArticle, (article) => article.author)
   articles?: NewsArticle[];
-
-  @OneToMany(() => Comment, (comment) => comment.user)
-  comments?: Comment[];
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -14,6 +14,7 @@ async function bootstrap() {
   );
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
+    exposedHeaders: ['X-New-Access-Token', 'X-New-Refresh-Token'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
 

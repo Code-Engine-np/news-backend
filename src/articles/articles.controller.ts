@@ -95,15 +95,9 @@ export class ArticlesController {
   @Roles(Role.ADMIN, Role.EDITOR)
   create(
     @Body() createArticleDto: CreateArticleDto,
-    @Req() request: { user: { id: string } },
+    @Req() request: { user: { sub: string } },
   ) {
-    console.log(
-      'Creating article with data:',
-      createArticleDto,
-      'by user:',
-      request.user.id,
-    );
-    return this.articlesService.create(createArticleDto, request.user.id);
+    return this.articlesService.create(createArticleDto, request.user.sub);
   }
 
   @Patch(':id')
@@ -116,7 +110,7 @@ export class ArticlesController {
   update(
     @Param('id') id: string,
     @Body() updateArticleDto: UpdateArticleDto,
-    @Req() request: { user: { id: string; role: Role } },
+    @Req() request: { user: { sub: string; role: Role } },
   ) {
     return this.articlesService.update(id, updateArticleDto, request.user);
   }
@@ -130,7 +124,7 @@ export class ArticlesController {
   @Roles(Role.ADMIN, Role.EDITOR)
   remove(
     @Param('id') id: string,
-    @Req() request: { user: { id: string; role: Role } },
+    @Req() request: { user: { sub: string; role: Role } },
   ) {
     return this.articlesService.remove(id, request.user);
   }

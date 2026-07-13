@@ -1,14 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import {
-  ArticleTag,
-  Category,
-  Comment,
-  Image,
-  NewsArticle,
-  Tag,
-} from '@/entities';
+import { Category, Image, NewsArticle } from '@/entities';
 import { UsersModule } from '@/users/users.module';
 import { ArticlesController } from '@/articles/articles.controller';
 import { ArticlesService } from '@/articles/articles.service';
@@ -17,14 +10,7 @@ import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      NewsArticle,
-      Category,
-      Tag,
-      ArticleTag,
-      Comment,
-      Image,
-    ]),
+    TypeOrmModule.forFeature([NewsArticle, Category, Image]),
     CategoriesModule,
     UsersModule,
 

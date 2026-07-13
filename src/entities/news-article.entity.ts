@@ -1,9 +1,5 @@
 import { NewsStatus } from '@/common/enums/news-status.enum';
-// import { ArticleLike } from '@/entities/article-like.entity';
-import { ArticleTag } from '@/entities/article-tag.entity';
-// import { ArticleView } from '@/entities/article-view.entity';
 import { Category } from '@/entities/category.entity';
-import { Comment } from '@/entities/comment.entity';
 import { Image } from '@/entities/image.entity';
 import { User } from '@/entities/user.entity';
 import {
@@ -59,12 +55,6 @@ export class NewsArticle {
     eager: false,
   })
   images!: Image[];
-
-  @OneToMany(() => ArticleTag, (articleTag) => articleTag.article)
-  articleTags?: ArticleTag[];
-
-  @OneToMany(() => Comment, (comment) => comment.article)
-  comments?: Comment[];
 
   @CreateDateColumn()
   createdAt!: Date;

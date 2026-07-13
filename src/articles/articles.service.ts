@@ -7,8 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { NewsArticle } from '@/entities/news-article.entity';
 import { Category } from '@/entities/category.entity';
-import { Tag } from '@/entities/tag.entity';
-import { ArticleTag } from '@/entities/article-tag.entity';
 import { Role } from '@/common/enums/role.enum';
 import { CreateArticleDto } from '@/articles/dto/create-article.dto';
 import { NewsStatus } from '@/common/enums/news-status.enum';
@@ -25,11 +23,9 @@ export class ArticlesService {
     private readonly articlesRepository: Repository<NewsArticle>,
     @InjectRepository(Category)
     private readonly categoriesRepository: Repository<Category>,
-    @InjectRepository(Tag)
-    private readonly tagsRepository: Repository<Tag>,
+
     @InjectRepository(Image)
-    private readonly imagesRepository: Repository<Image>,
-    @InjectRepository(ArticleTag)
+    // private readonly imagesRepository: Repository<Image>,
     private readonly usersService: UsersService,
 
     private readonly dataSource: DataSource,
@@ -67,7 +63,6 @@ export class ArticlesService {
         title: true,
         images: true,
         summary: true,
-        comments: true,
         createdAt: true,
         updatedAt: true,
         author: {
@@ -99,7 +94,6 @@ export class ArticlesService {
         title: true,
         images: true,
         summary: true,
-        comments: true,
         createdAt: true,
         updatedAt: true,
         author: {
@@ -118,7 +112,13 @@ export class ArticlesService {
   }
 
   async create(createArticleDto: CreateArticleDto, authorId: string) {
-   · const author = await this.usersService.findById(authorId);
+    console.log(
+      'Creating article with DTO:',
+      createArticleDto,
+      'and authorId:',
+      authorId,
+    );
+    const author = await this.usersService.findById(authorId);
     if (!author) {
       throw new NotFoundException('Author not found');
     }
@@ -156,9 +156,11 @@ export class ArticlesService {
             publicId: img.public_id,
             resourceType: img.resource_type,
             altText: img.alt_text,
+            article: savedArticle,
             articleId: savedArticle.id,
           }),
         );
+        console.log('Saving images:', images);
         await manager.save(Image, images);
       }
       return manager.findOne(NewsArticle, {
@@ -171,12 +173,12 @@ export class ArticlesService {
   async update(
     id: string,
     updateArticleDto: UpdateArticleDto,
-    actor: { id: string; role: Role },
+    actor: { sub: string; role: Role },
   ) {
     const article = await this.findOne(id);
 
     const canManageAll = actor.role === Role.ADMIN;
-    const isOwner = article.author.id === actor.id;
+    const isOwner = article.author.id === actor.sub;
     if (!canManageAll && !isOwner) {
       throw new ForbiddenException('You cannot edit this article');
     }
@@ -199,10 +201,10 @@ export class ArticlesService {
     return this.articlesRepository.save(article);
   }
 
-  async remove(id: string, actor: { id: string; role: Role }) {
+  async remove(id: string, actor: { sub: string; role: Role }) {
     const article = await this.findOne(id);
     const canManageAll = actor.role === Role.ADMIN;
-    const isOwner = article.author.id === actor.id;
+    const isOwner = article.author.id === actor.sub;
 
     if (!canManageAll && !isOwner) {
       throw new ForbiddenException('You cannot delete this article');

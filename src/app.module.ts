@@ -10,17 +10,12 @@ import { configuration } from '@/common/config/app.config';
 import { AppConfig } from '@/common/interfaces/env.interface';
 // import { NewsArticlesModule } from '@/news-articles/news-articles.module';
 import { CategoriesModule } from '@/categories/categories.module';
-import { TagsModule } from '@/tags/tags.module';
-import { CommentsModule } from '@/comments/comments.module';
 import { NewsletterSubscriptionsModule } from '@/newsletter-subscriptions/newsletter-subscriptions.module';
 import {
-  ArticleTag,
   Category,
-  Comment,
   Image,
   NewsArticle,
   NewsletterSubscription,
-  Tag,
   User,
 } from '@/entities';
 
@@ -44,25 +39,13 @@ import {
         }),
         logging: configService.get('DB_LOGGING', { infer: true }),
         retryAttempts: 3,
-        entities: [
-          User,
-          Category,
-          Tag,
-          ArticleTag,
-          Comment,
-          Image,
-          NewsletterSubscription,
-          NewsArticle,
-        ],
+        entities: [User, Category, Image, NewsletterSubscription, NewsArticle],
       }),
     }),
     AuthModule,
     UsersModule,
     ArticlesModule,
-    // NewsArticlesModule,
     CategoriesModule,
-    TagsModule,
-    CommentsModule,
     NewsletterSubscriptionsModule,
   ],
   controllers: [AppController],
