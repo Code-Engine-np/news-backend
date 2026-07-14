@@ -44,6 +44,14 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
+  @Get('slug/:slug')
+  @ApiParam({ name: 'slug', description: 'Category slug' })
+  @ApiOperation({ summary: 'Get a single category by slug' })
+  @ApiOkResponse({ description: 'Returns the requested category.' })
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.categoriesService.findBySlug(slug);
+  }
+
   @Post()
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create a new category' })

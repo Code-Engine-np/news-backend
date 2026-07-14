@@ -14,7 +14,7 @@ import { NewsletterSubscriptionsModule } from '@/newsletter-subscriptions/newsle
 import {
   Category,
   Image,
-  NewsArticle,
+  Article,
   NewsletterSubscription,
   User,
 } from '@/entities';
@@ -39,7 +39,7 @@ import {
         }),
         logging: configService.get('DB_LOGGING', { infer: true }),
         retryAttempts: 3,
-        entities: [User, Category, Image, NewsletterSubscription, NewsArticle],
+        entities: [User, Category, Image, NewsletterSubscription, Article],
       }),
     }),
     AuthModule,

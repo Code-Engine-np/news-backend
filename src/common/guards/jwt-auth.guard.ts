@@ -28,9 +28,6 @@ export class JwtAuthGuard implements CanActivate {
     const accessToken = this.extractToken(request);
     const refreshToken = this.extractRefreshToken(request);
 
-    console.log('Access Token:', accessToken);
-    console.log('Refresh Token:', refreshToken);
-
     // 1. Try to validate access token first
     let payload: JwtPayload | null = null;
 
@@ -45,7 +42,6 @@ export class JwtAuthGuard implements CanActivate {
         // Access token expired or invalid, will try refresh below
       }
     }
-    console.log('Payload after access token validation:', payload);
 
     // 2. If access token is invalid/expired, try to use refresh token
     if (!payload && refreshToken) {

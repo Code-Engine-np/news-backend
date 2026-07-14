@@ -14,8 +14,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity({ name: 'news_articles' })
-export class NewsArticle {
+@Entity({ name: 'articles' })
+export class Article {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -56,9 +56,9 @@ export class NewsArticle {
   })
   images!: Image[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

@@ -1,7 +1,7 @@
 import { CloudinaryImageDto } from '@/articles/dto/cloudinary-image.dto';
 import { NewsStatus } from '@/common/enums/news-status.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
@@ -36,19 +36,25 @@ export class CreateArticleDto {
   @IsString()
   content!: string;
 
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return [];
+  @Transform(
+    ({ value }: { value: unknown }): CloudinaryImageDto[] | undefined => {
+      if (value === undefined) {
+        return undefined;
       }
-    }
-    return value; // already an array when sent as JSON body
-  })
+      let raw: unknown = value;
+      if (typeof raw === 'string') {
+        try {
+          raw = JSON.parse(raw) as unknown;
+        } catch {
+          raw = [];
+        }
+      }
+      return plainToInstance(CloudinaryImageDto, raw as object[]);
+    },
+  )
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CloudinaryImageDto)
   images!: CloudinaryImageDto[];
 
   @ApiPropertyOptional({ enum: NewsStatus, description: 'Publication status' })

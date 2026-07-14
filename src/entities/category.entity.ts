@@ -1,3 +1,4 @@
+import { Article } from '@/entities/article.entity';
 import {
   Column,
   CreateDateColumn,
@@ -7,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { NewsArticle } from './news-article.entity';
+// import { NewsArticle } from './article.entity';
 
 @Entity({ name: 'categories' })
 export class Category {
@@ -19,23 +20,17 @@ export class Category {
   slug!: string;
 
   @Column({ type: 'varchar', length: 160, nullable: true })
-  nameEn?: string;
-
-  @Column({ type: 'varchar', length: 160, nullable: true })
-  nameNe?: string;
+  name?: string;
 
   @Column({ type: 'text', nullable: true })
-  descriptionEn?: string | null;
+  description?: string | null;
 
-  @Column({ type: 'text', nullable: true })
-  descriptionNe?: string | null;
+  @OneToMany(() => Article, (article) => article.category)
+  articles?: Article[];
 
-  @OneToMany(() => NewsArticle, (article) => article.category)
-  articles?: NewsArticle[];
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

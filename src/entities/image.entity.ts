@@ -1,3 +1,4 @@
+import { Article } from '@/entities/article.entity';
 import {
   Column,
   CreateDateColumn,
@@ -7,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { NewsArticle } from './news-article.entity';
+// import { NewsArticle } from './article.entity';
 
 @Entity({ name: 'images' })
 export class Image {
@@ -29,19 +30,19 @@ export class Image {
   @Column({ type: 'varchar', length: 160, nullable: true })
   caption?: string | null;
 
-  @ManyToOne(() => NewsArticle, (article) => article.images, {
+  @ManyToOne(() => Article, (article) => article.images, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'articleId' })
-  article!: NewsArticle;
+  article!: Article;
 
   @Column({ name: 'article_id' })
   articleId!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

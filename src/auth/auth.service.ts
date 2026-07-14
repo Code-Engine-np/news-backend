@@ -59,13 +59,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    console.log('User found:', user);
-
     const passwordMatches = verifyPassword(
       loginDto.password,
       user.passwordHash,
     );
-    console.log('Password matches:', passwordMatches);
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -76,7 +73,6 @@ export class AuthService {
   async refresh(refreshToken: RefreshTokenDto) {
     const payload = await this.verifyRefreshToken(refreshToken.refreshToken);
     const user = await this.usersService.findById(payload.sub);
-    console.log('User found for refresh token:', user);
 
     if (!user || !user.refreshTokenHash) {
       throw new UnauthorizedException('Invalid refresh token');

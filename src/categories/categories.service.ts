@@ -16,21 +16,30 @@ export class CategoriesService {
     private readonly categoriesRepository: Repository<Category>,
   ) {}
 
-  private mapCategoryToApi(category: Category): any {
+  private mapCategoryToApi(category: Category) {
     return {
       id: category.id,
       slug: category.slug,
-      name: category.nameNe || category.nameEn || '',
-      description: category.descriptionNe || category.descriptionEn || '',
+      name: category.name || '',
+      description: category.description || '',
     };
   }
 
-  findAll() {
-    return this.categoriesRepository
-      .find({
-        order: { createdAt: 'DESC' },
-      })
-      .then((categories) => categories.map((c) => this.mapCategoryToApi(c)));
+  private async getCategoryEntity(id: string): Promise<Category> {
+    const category = await this.categoriesRepository.findOne({
+      where: { id },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    return category;
+  }
+
+  async findAll() {
+    const categories = await this.categoriesRepository.find({
+      order: { createdAt: 'DESC' },
+    });
+    return categories.map((c) => this.mapCategoryToApi(c));
   }
 
   async findBySlug(slug: string) {
@@ -44,12 +53,7 @@ export class CategoriesService {
   }
 
   async findOne(id: string) {
-    const category = await this.categoriesRepository.findOne({
-      where: { id },
-    });
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
+    const category = await this.getCategoryEntity(id);
     return this.mapCategoryToApi(category);
   }
 
@@ -66,7 +70,7 @@ export class CategoriesService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    const category = await this.findOne(id);
+    const category = await this.getCategoryEntity(id);
 
     if (dto.slug && dto.slug !== category.slug) {
       const existingBySlug = await this.categoriesRepository.findOne({
@@ -82,7 +86,7 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const category = await this.findOne(id);
+    const category = await this.getCategoryEntity(id);
     await this.categoriesRepository.remove(category);
     return { deleted: true };
   }

@@ -8,25 +8,14 @@ export class UpdateCategoryDto {
   @MinLength(1)
   slug?: string;
 
-  @ApiPropertyOptional({ description: 'Category name in English' })
+  @ApiPropertyOptional({ description: 'Category name' })
   @IsOptional()
   @IsString()
   @MinLength(1)
-  nameEn?: string;
+  name?: string;
 
-  @ApiPropertyOptional({ description: 'Category name in Nepali' })
+  @ApiPropertyOptional({ description: 'Category description' })
   @IsOptional()
   @IsString()
-  @MinLength(1)
-  nameNe?: string;
-
-  @ApiPropertyOptional({ description: 'English description' })
-  @IsOptional()
-  @IsString()
-  descriptionEn?: string;
-
-  @ApiPropertyOptional({ description: 'Nepali description' })
-  @IsOptional()
-  @IsString()
-  descriptionNe?: string;
+  description?: string;
 }

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { NewsArticle } from '@/entities/news-article.entity';
+import { Article } from '@/entities/article.entity';
 import { Category } from '@/entities/category.entity';
 import { Role } from '@/common/enums/role.enum';
 import { CreateArticleDto } from '@/articles/dto/create-article.dto';
@@ -19,13 +19,11 @@ import { Image } from '@/entities';
 @Injectable()
 export class ArticlesService {
   constructor(
-    @InjectRepository(NewsArticle)
-    private readonly articlesRepository: Repository<NewsArticle>,
+    @InjectRepository(Article)
+    private readonly articlesRepository: Repository<Article>,
     @InjectRepository(Category)
     private readonly categoriesRepository: Repository<Category>,
 
-    @InjectRepository(Image)
-    // private readonly imagesRepository: Repository<Image>,
     private readonly usersService: UsersService,
 
     private readonly dataSource: DataSource,
@@ -71,12 +69,24 @@ export class ArticlesService {
         },
         category: true,
       },
+      relations: ['category', 'author', 'images'],
     });
   }
 
   async findOne(id: string) {
     const article = await this.articlesRepository.findOne({
       where: { id },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        images: true,
+        summary: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      relations: ['category', 'author', 'images'],
     });
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -94,6 +104,7 @@ export class ArticlesService {
         title: true,
         images: true,
         summary: true,
+        content: true,
         createdAt: true,
         updatedAt: true,
         author: {
@@ -102,7 +113,7 @@ export class ArticlesService {
         },
         category: true,
       },
-      relations: ['category', 'author'],
+      relations: ['category', 'author', 'images'],
     });
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -112,12 +123,6 @@ export class ArticlesService {
   }
 
   async create(createArticleDto: CreateArticleDto, authorId: string) {
-    console.log(
-      'Creating article with DTO:',
-      createArticleDto,
-      'and authorId:',
-      authorId,
-    );
     const author = await this.usersService.findById(authorId);
     if (!author) {
       throw new NotFoundException('Author not found');
@@ -133,19 +138,20 @@ export class ArticlesService {
       });
       category = await this.categoriesService.create({
         slug: slugfied,
-        nameNe: createArticleDto.category,
+        name: createArticleDto.category,
       });
     }
 
     const slugifiedTitle = slug(createArticleDto.title, { lower: true });
     return this.dataSource.transaction(async (manager) => {
-      const article = manager.create(NewsArticle, {
-        ...createArticleDto,
+      const article = manager.create(Article, {
+        title: createArticleDto.title,
+        summary: createArticleDto.summary,
+        content: createArticleDto.content,
         slug: slugifiedTitle,
         author,
         category,
         status: createArticleDto.status ?? NewsStatus.DRAFT,
-        images: [],
       });
       const savedArticle = await manager.save(article);
 
@@ -156,14 +162,14 @@ export class ArticlesService {
             publicId: img.public_id,
             resourceType: img.resource_type,
             altText: img.alt_text,
+            caption: img.caption,
             article: savedArticle,
             articleId: savedArticle.id,
           }),
         );
-        console.log('Saving images:', images);
         await manager.save(Image, images);
       }
-      return manager.findOne(NewsArticle, {
+      return manager.findOne(Article, {
         where: { id: savedArticle.id },
         relations: ['category', 'author', 'images'],
       });
@@ -183,7 +189,12 @@ export class ArticlesService {
       throw new ForbiddenException('You cannot edit this article');
     }
 
-    const { categoryId, ...articleData } = updateArticleDto;
+    const {
+      categoryId,
+      category: categoryName,
+      images,
+      ...articleData
+    } = updateArticleDto;
     Object.assign(article, articleData);
 
     if (categoryId) {
@@ -196,9 +207,41 @@ export class ArticlesService {
       }
 
       article.category = category;
+    } else if (categoryName) {
+      const slugified = slug(categoryName, { lower: true });
+      article.category = await this.categoriesService.create({
+        slug: slugified,
+        name: categoryName,
+      });
     }
 
-    return this.articlesRepository.save(article);
+    return this.dataSource.transaction(async (manager) => {
+      const savedArticle = await manager.save(Article, article);
+
+      if (images) {
+        await manager.delete(Image, { articleId: savedArticle.id });
+
+        if (images.length) {
+          const newImages = images.map((img) =>
+            manager.create(Image, {
+              secureUrl: img.secure_url,
+              publicId: img.public_id,
+              resourceType: img.resource_type,
+              altText: img.alt_text,
+              caption: img.caption,
+              article: savedArticle,
+              articleId: savedArticle.id,
+            }),
+          );
+          await manager.save(Image, newImages);
+        }
+      }
+
+      return manager.findOne(Article, {
+        where: { id: savedArticle.id },
+        relations: ['category', 'author', 'images'],
+      });
+    });
   }
 
   async remove(id: string, actor: { sub: string; role: Role }) {

@@ -1,5 +1,6 @@
 import { Role } from '@/common/enums/role.enum';
-import { NewsArticle } from '@/entities/news-article.entity';
+import { Article } from '@/entities/article.entity';
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -19,13 +20,16 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   email!: string;
 
+  @Exclude()
   @Column({ type: 'varchar', length: 255 })
   passwordHash!: string;
 
+  @Exclude()
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 255, nullable: true })
   googleId?: string | null;
 
+  @Exclude()
   @Column({ type: 'varchar', length: 500, nullable: true })
   refreshTokenHash?: string | null;
 
@@ -35,12 +39,12 @@ export class User {
   @Column({ type: 'varchar', length: 150 })
   fullName!: string;
 
-  @OneToMany(() => NewsArticle, (article) => article.author)
-  articles?: NewsArticle[];
+  @OneToMany(() => Article, (article) => article.author)
+  articles?: Article[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }
