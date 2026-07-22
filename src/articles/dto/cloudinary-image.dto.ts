@@ -1,17 +1,21 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CloudinaryImageDto {
   @IsString()
-  @IsNotEmpty()
-  secure_url!: string;
+  @IsOptional()
+  secure_url?: string;
 
   @IsString()
-  @IsNotEmpty()
-  public_id!: string;
+  @IsOptional()
+  public_id?: string;
 
   @IsString()
-  @IsNotEmpty()
-  resource_type!: string;
+  @IsOptional()
+  resource_type?: string;
+
+  @IsUrl()
+  @IsOptional()
+  youtube_url?: string;
 
   @IsString()
   @IsOptional()

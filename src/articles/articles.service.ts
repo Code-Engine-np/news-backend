@@ -158,9 +158,10 @@ export class ArticlesService {
       if (createArticleDto.images?.length) {
         const images = createArticleDto.images.map((img) =>
           manager.create(Image, {
-            secureUrl: img.secure_url,
-            publicId: img.public_id,
-            resourceType: img.resource_type,
+            secureUrl: img.secure_url || null,
+            publicId: img.public_id || null,
+            resourceType: img.resource_type || null,
+            youtubeUrl: img.youtube_url || null,
             altText: img.alt_text,
             caption: img.caption,
             article: savedArticle,
@@ -224,9 +225,10 @@ export class ArticlesService {
         if (images.length) {
           const newImages = images.map((img) =>
             manager.create(Image, {
-              secureUrl: img.secure_url,
-              publicId: img.public_id,
-              resourceType: img.resource_type,
+              secureUrl: img.secure_url || null,
+              publicId: img.public_id || null,
+              resourceType: img.resource_type || null,
+              youtubeUrl: img.youtube_url || null,
               altText: img.alt_text,
               caption: img.caption,
               article: savedArticle,

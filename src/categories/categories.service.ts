@@ -61,6 +61,7 @@ export class CategoriesService {
     const existingBySlug = await this.categoriesRepository.findOne({
       where: { slug: dto.slug },
     });
+
     if (existingBySlug) {
       throw new ConflictException('Category slug already exists');
     }

@@ -15,14 +15,18 @@ export class Image {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', length: 500 })
-  secureUrl!: string;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  secureUrl?: string | null;
 
-  @Column({ type: 'varchar', length: 500 })
-  publicId!: string;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  publicId?: string | null;
 
-  @Column({ type: 'varchar', length: 100 })
-  resourceType!: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  resourceType?: string | null;
+
+  /** YouTube video URL stored instead of a Cloudinary asset. */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  youtubeUrl?: string | null;
 
   @Column({ type: 'varchar', length: 120, nullable: true })
   altText?: string | null;
