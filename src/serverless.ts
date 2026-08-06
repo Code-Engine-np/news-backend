@@ -4,15 +4,26 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { AppModule } from '../src/app.module';
 import type { IncomingMessage, ServerResponse } from 'http';
+import { AppModule } from '@/app.module';
 
+/**
+ * Serverless entry for Vercel.
+ *
+ * This file lives in `src/` on purpose: `nest build` compiles it and
+ * `tsc-alias` (postbuild) rewrites every `@/...` import into a real relative
+ * path in `dist/`. The Vercel function (`api/index.js`) then loads the clean,
+ * alias-free `dist/serverless.js` instead of having Vercel re-transpile the
+ * `src/` tree (which leaves `@/` specifiers unresolved).
+ *
+ * The Express instance and the initialized Nest app are cached across
+ * invocations so warm Lambdas skip the bootstrap.
+ */
 const server = express();
-let bootstrapPromise: Promise<void> | null = null;
+let ready: Promise<void> | null = null;
 
-async function bootstrap() {
-  const adapter = new ExpressAdapter(server);
-  const app = await NestFactory.create(AppModule, adapter);
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
   app.setGlobalPrefix('api');
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -53,10 +64,10 @@ async function bootstrap() {
 export default async function handler(
   req: IncomingMessage,
   res: ServerResponse,
-) {
-  if (!bootstrapPromise) {
-    bootstrapPromise = bootstrap();
+): Promise<void> {
+  if (!ready) {
+    ready = bootstrap();
   }
-  await bootstrapPromise;
-  server(req, res);
+  await ready;
+  server(req as express.Request, res as express.Response);
 }

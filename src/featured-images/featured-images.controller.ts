@@ -55,9 +55,13 @@ export class FeaturedImagesController {
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.EDITOR)
-  @ApiOperation({ summary: 'Get Cloudinary upload signature for featured images' })
+  @ApiOperation({
+    summary: 'Get Cloudinary upload signature for featured images',
+  })
   getUploadSignature() {
-    return this.cloudinaryService.generateUploadSignature('Best_News_Assets/featured');
+    return this.cloudinaryService.generateUploadSignature(
+      'Best_News_Assets/featured',
+    );
   }
 
   /** Cloudinary delete signature */

@@ -35,7 +35,9 @@ export class FeaturedImagesService {
   }
 
   async findAll() {
-    const rows = await this.repo.find({ order: { order: 'ASC', createdAt: 'DESC' } });
+    const rows = await this.repo.find({
+      order: { order: 'ASC', createdAt: 'DESC' },
+    });
     return rows.map((r) => this.map(r));
   }
 
