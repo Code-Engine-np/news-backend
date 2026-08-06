@@ -1,5 +1,9 @@
+# This project is a single package, not a real workspace. The `packages`
+# field below matches nothing on purpose — it exists only so pnpm 9 (used by
+# Vercel) doesn't fail with "packages field missing or empty". `allowBuilds`
+# is honored by pnpm 10+/11 (local) and ignored by pnpm 9.
+packages:
+  - 'packages/*'
 allowBuilds:
   '@nestjs/core': true
-  '@scarf/scarf': false
-  bcrypt: set this to true or false
   unrs-resolver: true
