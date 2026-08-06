@@ -48,7 +48,7 @@ export class ArticlesController {
   @ApiOperation({ summary: 'Get Cloudinary upload signature' })
   @ApiOkResponse({ description: 'Returns Cloudinary upload signature.' })
   getUploadSignature() {
-    return this.cloudinaryService.generateUploadSignature();
+    return this.cloudinaryService.generateUploadSignature('Best_News_Assets/articles');
   }
 
   @Get('delete-signature')

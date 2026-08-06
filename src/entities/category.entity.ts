@@ -4,11 +4,12 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-// import { NewsArticle } from './article.entity';
 
 @Entity({ name: 'categories' })
 export class Category {
@@ -25,8 +26,18 @@ export class Category {
   @Column({ type: 'text', nullable: true })
   description?: string | null;
 
+  @Column({ type: 'uuid', nullable: true })
+  parentId?: string | null;
+
+  @ManyToOne(() => Category, (c) => c.children, { nullable: true })
+  @JoinColumn({ name: 'parentId' })
+  parent?: Category | null;
+
   @OneToMany(() => Article, (article) => article.category)
   articles?: Article[];
+
+  @OneToMany(() => Category, (c) => c.parent)
+  children?: Category[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;

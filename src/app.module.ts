@@ -11,12 +11,16 @@ import { AppConfig } from '@/common/interfaces/env.interface';
 // import { NewsArticlesModule } from '@/news-articles/news-articles.module';
 import { CategoriesModule } from '@/categories/categories.module';
 import { NewsletterSubscriptionsModule } from '@/newsletter-subscriptions/newsletter-subscriptions.module';
+import { AdvertisementsModule } from '@/advertisements/advertisements.module';
+import { FeaturedImagesModule } from '@/featured-images/featured-images.module';
 import {
   Category,
   Image,
   Article,
   NewsletterSubscription,
   User,
+  Advertisement,
+  FeaturedImage,
 } from '@/entities';
 
 @Module({
@@ -39,7 +43,7 @@ import {
         }),
         logging: configService.get('DB_LOGGING', { infer: true }),
         retryAttempts: 3,
-        entities: [User, Category, Image, NewsletterSubscription, Article],
+        entities: [User, Category, Image, NewsletterSubscription, Article, Advertisement, FeaturedImage],
       }),
     }),
     AuthModule,
@@ -47,6 +51,8 @@ import {
     ArticlesModule,
     CategoriesModule,
     NewsletterSubscriptionsModule,
+    AdvertisementsModule,
+    FeaturedImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

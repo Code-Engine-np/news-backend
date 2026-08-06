@@ -22,6 +22,7 @@ export class CategoriesService {
       slug: category.slug,
       name: category.name || '',
       description: category.description || '',
+      parentId: category.parentId ?? null,
     };
   }
 
