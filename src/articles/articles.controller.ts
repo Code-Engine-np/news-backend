@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -24,16 +25,40 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Role } from '@/common/enums/role.enum';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 @ApiTags('articles')
 @Controller('articles')
 export class ArticlesController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(
+    private readonly articlesService: ArticlesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('published')
   @ApiOperation({ summary: 'List published articles' })
   @ApiOkResponse({ description: 'Returns published articles.' })
   findPublished() {
     return this.articlesService.findPublished();
+  }
+
+  @Get('upload-signature')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.EDITOR)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get Cloudinary upload signature' })
+  @ApiOkResponse({ description: 'Returns Cloudinary upload signature.' })
+  getUploadSignature() {
+    return this.cloudinaryService.generateUploadSignature('Best_News_Assets/articles');
+  }
+
+  @Get('delete-signature')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get Cloudinary delete signature' })
+  @ApiOkResponse({ description: 'Returns Cloudinary delete signature.' })
+  @Roles(Role.ADMIN, Role.EDITOR)
+  getDeleteSignature(@Query('publicId') publicId: string) {
+    return this.cloudinaryService.generateDeleteSignature(publicId);
   }
 
   @Get()
@@ -54,6 +79,14 @@ export class ArticlesController {
     return this.articlesService.findOne(id);
   }
 
+  @Get('slug/:slug')
+  @ApiParam({ name: 'slug', description: 'Article slug' })
+  @ApiOperation({ summary: 'Get a single article by slug' })
+  @ApiOkResponse({ description: 'Returns the requested article.' })
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.articlesService.findOneBySlug(slug);
+  }
+
   @Post()
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create a new article' })
@@ -62,9 +95,9 @@ export class ArticlesController {
   @Roles(Role.ADMIN, Role.EDITOR)
   create(
     @Body() createArticleDto: CreateArticleDto,
-    @Req() request: { user: { id: string } },
+    @Req() request: { user: { sub: string } },
   ) {
-    return this.articlesService.create(createArticleDto, request.user.id);
+    return this.articlesService.create(createArticleDto, request.user.sub);
   }
 
   @Patch(':id')
@@ -77,7 +110,7 @@ export class ArticlesController {
   update(
     @Param('id') id: string,
     @Body() updateArticleDto: UpdateArticleDto,
-    @Req() request: { user: { id: string; role: Role } },
+    @Req() request: { user: { sub: string; role: Role } },
   ) {
     return this.articlesService.update(id, updateArticleDto, request.user);
   }
@@ -91,7 +124,7 @@ export class ArticlesController {
   @Roles(Role.ADMIN, Role.EDITOR)
   remove(
     @Param('id') id: string,
-    @Req() request: { user: { id: string; role: Role } },
+    @Req() request: { user: { sub: string; role: Role } },
   ) {
     return this.articlesService.remove(id, request.user);
   }

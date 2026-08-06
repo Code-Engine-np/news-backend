@@ -1,10 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { NewsletterSubscriptionsService } from './newsletter-subscriptions.service';
@@ -17,7 +24,9 @@ import { Role } from '../common/enums/role.enum';
 @ApiTags('newsletter-subscriptions')
 @Controller('newsletter-subscriptions')
 export class NewsletterSubscriptionsController {
-  constructor(private readonly newsletterSubscriptionsService: NewsletterSubscriptionsService) {}
+  constructor(
+    private readonly newsletterSubscriptionsService: NewsletterSubscriptionsService,
+  ) {}
 
   @Get()
   @ApiBearerAuth('JWT-auth')

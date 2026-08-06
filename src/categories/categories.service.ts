@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../entities';
@@ -12,39 +16,53 @@ export class CategoriesService {
     private readonly categoriesRepository: Repository<Category>,
   ) {}
 
-  findAll() {
-    return this.categoriesRepository.find({
-      order: { createdAt: 'DESC' },
-      relations: ['articles'],
+  private mapCategoryToApi(category: Category) {
+    return {
+      id: category.id,
+      slug: category.slug,
+      name: category.name || '',
+      description: category.description || '',
+      parentId: category.parentId ?? null,
+    };
+  }
+
+  private async getCategoryEntity(id: string): Promise<Category> {
+    const category = await this.categoriesRepository.findOne({
+      where: { id },
     });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    return category;
+  }
+
+  async findAll() {
+    const categories = await this.categoriesRepository.find({
+      order: { createdAt: 'DESC' },
+    });
+    return categories.map((c) => this.mapCategoryToApi(c));
   }
 
   async findBySlug(slug: string) {
     const category = await this.categoriesRepository.findOne({
       where: { slug },
-      relations: ['articles'],
     });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-    return category;
+    return this.mapCategoryToApi(category);
   }
 
   async findOne(id: string) {
-    const category = await this.categoriesRepository.findOne({
-      where: { id },
-      relations: ['articles'],
-    });
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
-    return category;
+    const category = await this.getCategoryEntity(id);
+    return this.mapCategoryToApi(category);
   }
 
   async create(dto: CreateCategoryDto) {
     const existingBySlug = await this.categoriesRepository.findOne({
       where: { slug: dto.slug },
     });
+
     if (existingBySlug) {
       throw new ConflictException('Category slug already exists');
     }
@@ -54,7 +72,7 @@ export class CategoriesService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    const category = await this.findOne(id);
+    const category = await this.getCategoryEntity(id);
 
     if (dto.slug && dto.slug !== category.slug) {
       const existingBySlug = await this.categoriesRepository.findOne({
@@ -70,7 +88,7 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const category = await this.findOne(id);
+    const category = await this.getCategoryEntity(id);
     await this.categoriesRepository.remove(category);
     return { deleted: true };
   }

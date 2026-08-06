@@ -1,3 +1,6 @@
+import { Role } from '@/common/enums/role.enum';
+import { Article } from '@/entities/article.entity';
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -7,12 +10,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../common/enums/role.enum';
-import { ArticleLike } from './article-like.entity';
-import { ArticleView } from './article-view.entity';
-import { Comment } from './comment.entity';
-import { Media } from './media.entity';
-import { NewsArticle } from './news-article.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -23,13 +20,16 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   email!: string;
 
+  @Exclude()
   @Column({ type: 'varchar', length: 255 })
   passwordHash!: string;
 
+  @Exclude()
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 255, nullable: true })
   googleId?: string | null;
 
+  @Exclude()
   @Column({ type: 'varchar', length: 500, nullable: true })
   refreshTokenHash?: string | null;
 
@@ -39,24 +39,12 @@ export class User {
   @Column({ type: 'varchar', length: 150 })
   fullName!: string;
 
-  @OneToMany(() => NewsArticle, (article) => article.author)
-  articles?: NewsArticle[];
+  @OneToMany(() => Article, (article) => article.author)
+  articles?: Article[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
-  comments?: Comment[];
-
-  @OneToMany(() => Media, (media) => media.uploader)
-  uploadedMedia?: Media[];
-
-  @OneToMany(() => ArticleView, (view) => view.user)
-  articleViews?: ArticleView[];
-
-  @OneToMany(() => ArticleLike, (like) => like.user)
-  articleLikes?: ArticleLike[];
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

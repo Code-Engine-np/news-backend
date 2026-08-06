@@ -7,35 +7,37 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import { hashToken, verifyToken } from '../security/token-hash.util';
-import { UsersService } from '../../users/users.service';
+import { ConfigService } from '@nestjs/config';
+import { JwtPayload } from '@/common/interfaces/jwt-payload';
+import { UsersService } from '@/users/users.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user?: unknown }>();
+      .getRequest<Request & { user?: JwtPayload }>();
     const response = context.switchToHttp().getResponse<Response>();
 
     const accessToken = this.extractToken(request);
     const refreshToken = this.extractRefreshToken(request);
 
     // 1. Try to validate access token first
-    let payload: { sub: string; email: string; role: string } | null = null;
+    let payload: JwtPayload | null = null;
 
     if (accessToken) {
       try {
-        payload = (await this.jwtService.verifyAsync(accessToken, {
-          secret:
-            process.env.JWT_ACCESS_SECRET ||
-            process.env.JWT_SECRET ||
-            'dev_jwt_secret_change_me',
-        })) as { sub: string; email: string; role: string };
+        payload = await this.jwtService.verifyAsync<JwtPayload>(accessToken, {
+          secret: this.configService.get<string>('JWT_ACCESS_SECRET', {
+            infer: true,
+          }),
+        });
       } catch {
         // Access token expired or invalid, will try refresh below
       }
@@ -70,12 +72,16 @@ export class JwtAuthGuard implements CanActivate {
   private async tryRefresh(
     refreshToken: string,
     response: Response,
-  ): Promise<{ sub: string; email: string; role: string } | null> {
+  ): Promise<JwtPayload | null> {
     try {
-      const payload = (await this.jwtService.verifyAsync(refreshToken, {
-        secret:
-          process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret_change_me',
-      })) as { sub: string; email: string; role: string };
+      const payload: JwtPayload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        {
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET', {
+            infer: true,
+          }),
+        },
+      );
 
       const user = await this.usersService.findById(payload.sub);
       if (!user || !user.refreshTokenHash) {
@@ -83,42 +89,54 @@ export class JwtAuthGuard implements CanActivate {
       }
 
       if (!verifyToken(refreshToken, user.refreshTokenHash)) {
-        return null;
+        // return null;
+        await this.usersService.updateRefreshTokenHash(user.id, null);
+        throw new UnauthorizedException(
+          'Refresh token is invalid or has been revoked',
+        );
       }
 
       // Issue new token pair -------------------------------------------------
-      const newAccessToken = await this.jwtService.signAsync(
-        { sub: user.id, email: user.email, role: user.role },
-        {
-          secret:
-            process.env.JWT_ACCESS_SECRET ||
-            process.env.JWT_SECRET ||
-            'dev_jwt_secret_change_me',
-          expiresIn: 15 * 60,
-        },
-      );
-
-      const newRefreshToken = await this.jwtService.signAsync(
-        { sub: user.id, email: user.email, role: user.role },
-        {
-          secret:
-            process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret_change_me',
-          expiresIn: 7 * 24 * 60 * 60,
-        },
-      );
-
-      // Store new refresh token hash
-      await this.usersService.updateRefreshTokenHash(
+      return this.usersService.refreshWithLock(
         user.id,
-        hashToken(newRefreshToken),
+        async (): Promise<JwtPayload> => {
+          const newAccessToken = await this.jwtService.signAsync(
+            { sub: user.id, email: user.email, role: user.role },
+            {
+              secret: this.configService.get<string>('JWT_ACCESS_SECRET', {
+                infer: true,
+              }),
+              expiresIn: 15 * 60,
+            },
+          );
+
+          const newRefreshToken = await this.jwtService.signAsync(
+            { sub: user.id, email: user.email, role: user.role },
+            {
+              secret: this.configService.get<string>('JWT_REFRESH_SECRET', {
+                infer: true,
+              }),
+              expiresIn: 7 * 24 * 60 * 60,
+            },
+          );
+
+          // Store new refresh token hash
+          await this.usersService.updateRefreshTokenHash(
+            user.id,
+            hashToken(newRefreshToken),
+          );
+
+          // Send new tokens back in headers so the client can update its store
+          response.setHeader('X-New-Access-Token', newAccessToken);
+          response.setHeader('X-New-Refresh-Token', newRefreshToken);
+
+          return { sub: user.id, email: user.email, role: user.role };
+        },
       );
-
-      // Send new tokens back in headers so the client can update its store
-      response.setHeader('X-New-Access-Token', newAccessToken);
-      response.setHeader('X-New-Refresh-Token', newRefreshToken);
-
-      return { sub: user.id, email: user.email, role: user.role };
-    } catch {
+    } catch (err) {
+      if (err instanceof UnauthorizedException) {
+        throw err;
+      }
       return null;
     }
   }

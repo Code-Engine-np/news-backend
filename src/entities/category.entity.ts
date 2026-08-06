@@ -1,13 +1,15 @@
+import { Article } from '@/entities/article.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { NewsArticle } from './news-article.entity';
 
 @Entity({ name: 'categories' })
 export class Category {
@@ -18,24 +20,28 @@ export class Category {
   @Column({ type: 'varchar', length: 120 })
   slug!: string;
 
-  @Column({ type: 'varchar', length: 160 })
-  nameEn!: string;
-
-  @Column({ type: 'varchar', length: 160 })
-  nameNe!: string;
+  @Column({ type: 'varchar', length: 160, nullable: true })
+  name?: string;
 
   @Column({ type: 'text', nullable: true })
-  descriptionEn?: string | null;
+  description?: string | null;
 
-  @Column({ type: 'text', nullable: true })
-  descriptionNe?: string | null;
+  @Column({ type: 'uuid', nullable: true })
+  parentId?: string | null;
 
-  @OneToMany(() => NewsArticle, (article) => article.category)
-  articles?: NewsArticle[];
+  @ManyToOne(() => Category, (c) => c.children, { nullable: true })
+  @JoinColumn({ name: 'parentId' })
+  parent?: Category | null;
 
-  @CreateDateColumn()
+  @OneToMany(() => Article, (article) => article.category)
+  articles?: Article[];
+
+  @OneToMany(() => Category, (c) => c.parent)
+  children?: Category[];
+
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

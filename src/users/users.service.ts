@@ -15,6 +15,24 @@ export class UsersService implements OnModuleInit {
     private readonly configService: ConfigService,
   ) {}
 
+  private refreshLocks = new Map<string, Promise<any>>();
+
+  async refreshWithLock<T>(
+    userId: string,
+    refreshFn: () => Promise<T>,
+  ): Promise<T> {
+    if (this.refreshLocks.has(userId)) {
+      return this.refreshLocks.get(userId) as Promise<T>;
+    }
+
+    const refreshPromise = refreshFn().finally(() => {
+      this.refreshLocks.delete(userId);
+    });
+
+    this.refreshLocks.set(userId, refreshPromise);
+    return refreshPromise;
+  }
+
   async onModuleInit(): Promise<void> {
     const seedAdminEmail = this.configService.get<string>('SEED_ADMIN_EMAIL');
     const seedAdminPassword = this.configService.get<string>(
@@ -86,7 +104,9 @@ export class UsersService implements OnModuleInit {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { email: email.toLowerCase() },
+      where: {
+        email: email.toLowerCase(),
+      },
     });
   }
 

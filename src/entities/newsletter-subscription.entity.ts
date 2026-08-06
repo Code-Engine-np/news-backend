@@ -25,9 +25,9 @@ export class NewsletterSubscription {
   @Column({ type: 'timestamp with time zone', nullable: true })
   unsubscribedAt?: Date | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   subscribedAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, MinLength, IsOptional } from 'class-validator';
+import { IsString, MinLength, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty({ description: 'Unique URL slug for the category' })
@@ -7,23 +7,20 @@ export class CreateCategoryDto {
   @MinLength(1)
   slug!: string;
 
-  @ApiProperty({ description: 'Category name in English' })
+  @ApiProperty({ description: 'Category name' })
   @IsString()
   @MinLength(1)
-  nameEn!: string;
+  name!: string;
 
-  @ApiProperty({ description: 'Category name in Nepali' })
-  @IsString()
-  @MinLength(1)
-  nameNe!: string;
-
-  @ApiPropertyOptional({ description: 'English description' })
+  @ApiPropertyOptional({ description: 'Category description' })
   @IsOptional()
   @IsString()
-  descriptionEn?: string;
+  description?: string;
 
-  @ApiPropertyOptional({ description: 'Nepali description' })
+  @ApiPropertyOptional({
+    description: 'Parent category UUID (for subcategories)',
+  })
   @IsOptional()
-  @IsString()
-  descriptionNe?: string;
+  @IsUUID()
+  parentId?: string;
 }
