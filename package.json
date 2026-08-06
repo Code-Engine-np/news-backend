@@ -33,6 +33,7 @@
     "class-validator": "^0.14.1",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
     "joi": "^17.13.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
