@@ -13,6 +13,7 @@ import { CategoriesModule } from '@/categories/categories.module';
 import { NewsletterSubscriptionsModule } from '@/newsletter-subscriptions/newsletter-subscriptions.module';
 import { AdvertisementsModule } from '@/advertisements/advertisements.module';
 import { FeaturedImagesModule } from '@/featured-images/featured-images.module';
+import { ContactModule } from '@/contact/contact.module';
 import {
   Category,
   Image,
@@ -61,6 +62,7 @@ import {
     NewsletterSubscriptionsModule,
     AdvertisementsModule,
     FeaturedImagesModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
