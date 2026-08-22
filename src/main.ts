@@ -3,19 +3,15 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '@/app.module';
+import { buildCorsOptions } from '@/common/cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
-    exposedHeaders: ['X-New-Access-Token', 'X-New-Refresh-Token'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  });
-
   // Parse cookies (including refresh-token cookie)
   app.use(cookieParser());
+  app.setGlobalPrefix('api');
+  app.enableCors(buildCorsOptions());
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('News Backend API')

@@ -6,6 +6,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import type { IncomingMessage, ServerResponse } from 'http';
 import { AppModule } from '@/app.module';
+import { buildCorsOptions } from '@/common/cors';
 
 /**
  * Serverless entry for Vercel.
@@ -27,11 +28,7 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('api');
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
-    exposedHeaders: ['X-New-Access-Token', 'X-New-Refresh-Token'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  });
+  app.enableCors(buildCorsOptions());
   app.use(cookieParser());
 
   const swaggerConfig = new DocumentBuilder()
