@@ -60,7 +60,9 @@ export class AdvertisementsController {
   @Roles(Role.ADMIN, Role.EDITOR)
   @ApiOperation({ summary: 'Get Cloudinary upload signature for ad images' })
   getUploadSignature() {
-    return this.cloudinaryService.generateUploadSignature('Best_News_Assets/advertisements');
+    return this.cloudinaryService.generateUploadSignature(
+      'Best_News_Assets/advertisements',
+    );
   }
 
   /** Admin: Cloudinary delete signature */

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThanOrEqual, IsNull, Or, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Advertisement, AdPosition } from '@/entities/advertisement.entity';
 import { CreateAdvertisementDto } from './dto/create-advertisement.dto';
 import { UpdateAdvertisementDto } from './dto/update-advertisement.dto';
@@ -73,8 +73,18 @@ export class AdvertisementsService {
     if (!ad) throw new NotFoundException('Advertisement not found');
     Object.assign(ad, {
       ...dto,
-      startDate: dto.startDate !== undefined ? (dto.startDate ? new Date(dto.startDate) : null) : ad.startDate,
-      endDate: dto.endDate !== undefined ? (dto.endDate ? new Date(dto.endDate) : null) : ad.endDate,
+      startDate:
+        dto.startDate !== undefined
+          ? dto.startDate
+            ? new Date(dto.startDate)
+            : null
+          : ad.startDate,
+      endDate:
+        dto.endDate !== undefined
+          ? dto.endDate
+            ? new Date(dto.endDate)
+            : null
+          : ad.endDate,
     });
     return this.map(await this.repo.save(ad));
   }
