@@ -14,6 +14,7 @@ import { NewsletterSubscriptionsModule } from '@/newsletter-subscriptions/newsle
 import { AdvertisementsModule } from '@/advertisements/advertisements.module';
 import { FeaturedImagesModule } from '@/featured-images/featured-images.module';
 import { ContactModule } from '@/contact/contact.module';
+import { PopupNoticesModule } from '@/popup-notices/popup-notices.module';
 import {
   Category,
   Image,
@@ -22,6 +23,7 @@ import {
   User,
   Advertisement,
   FeaturedImage,
+  PopupNotice,
 } from '@/entities';
 
 @Module({
@@ -52,6 +54,7 @@ import {
           Article,
           Advertisement,
           FeaturedImage,
+          PopupNotice,
         ],
       }),
     }),
@@ -63,6 +66,7 @@ import {
     AdvertisementsModule,
     FeaturedImagesModule,
     ContactModule,
+    PopupNoticesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

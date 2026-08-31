@@ -6,3 +6,4 @@ export * from '@/entities/article.entity';
 export * from '@/entities/newsletter-subscription.entity';
 export * from '@/entities/advertisement.entity';
 export * from '@/entities/featured-image.entity';
+export * from '@/entities/popup-notice.entity';
