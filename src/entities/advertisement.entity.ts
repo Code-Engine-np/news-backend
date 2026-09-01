@@ -8,7 +8,7 @@ import {
 
 export enum AdPosition {
   BANNER = 'banner',
-  SIDEBAR = 'sidebar',
+  HEADER = 'header',
   INLINE = 'inline',
 }
 
