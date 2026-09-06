@@ -15,6 +15,16 @@ import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
 import slug from 'slug';
 import { CategoriesService } from '@/categories/categories.service';
 import { Image } from '@/entities';
+import { PaginationQueryDto } from '@/articles/dto/pagination-query.dto';
+import { ArticlesQueryDto } from '@/articles/dto/articles-query.dto';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 @Injectable()
 export class ArticlesService {
@@ -31,30 +41,49 @@ export class ArticlesService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  findAll() {
-    return this.articlesRepository.find({
-      order: { createdAt: 'DESC' },
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<Article[] | PaginatedResult<Article>> {
+    const baseOptions = {
+      order: { createdAt: 'DESC' as const },
       select: {
         id: true,
         slug: true,
         title: true,
         summary: true,
+        status: true,
         category: true,
-        author: {
-          id: true,
-          fullName: true,
-        },
+        author: { id: true, fullName: true },
         createdAt: true,
         updatedAt: true,
       },
       relations: ['category', 'author'],
+    };
+
+    if (query.page == null) {
+      return this.articlesRepository.find(baseOptions);
+    }
+
+    const { page, limit = 10 } = query;
+    const [data, total] = await this.articlesRepository.findAndCount({
+      ...baseOptions,
+      take: limit,
+      skip: (page - 1) * limit,
     });
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
-  findPublished() {
-    return this.articlesRepository.find({
-      where: { status: NewsStatus.PUBLISHED },
-      order: { createdAt: 'DESC' },
+  async findPublished(
+    query: ArticlesQueryDto = {},
+  ): Promise<Article[] | PaginatedResult<Article>> {
+    const where: Record<string, unknown> = { status: NewsStatus.PUBLISHED };
+    if (query.categorySlug) {
+      where.category = { slug: query.categorySlug };
+    }
+
+    const baseOptions = {
+      where,
+      order: { createdAt: 'DESC' as const },
       select: {
         id: true,
         slug: true,
@@ -63,14 +92,24 @@ export class ArticlesService {
         summary: true,
         createdAt: true,
         updatedAt: true,
-        author: {
-          id: true,
-          fullName: true,
-        },
+        author: { id: true, fullName: true },
         category: true,
       },
       relations: ['category', 'author', 'images'],
+    };
+
+    // No pagination params → return flat array (backward-compatible for home page)
+    if (query.page == null && !query.categorySlug) {
+      return this.articlesRepository.find(baseOptions);
+    }
+
+    const { page = 1, limit = 10 } = query;
+    const [data, total] = await this.articlesRepository.findAndCount({
+      ...baseOptions,
+      take: limit,
+      skip: (page - 1) * limit,
     });
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findOne(id: string) {
