@@ -21,6 +21,8 @@ import {
 import { ArticlesService } from '@/articles/articles.service';
 import { CreateArticleDto } from '@/articles/dto/create-article.dto';
 import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
+import { PaginationQueryDto } from '@/articles/dto/pagination-query.dto';
+import { ArticlesQueryDto } from '@/articles/dto/articles-query.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Role } from '@/common/enums/role.enum';
@@ -36,9 +38,12 @@ export class ArticlesController {
 
   @Get('published')
   @ApiOperation({ summary: 'List published articles' })
-  @ApiOkResponse({ description: 'Returns published articles.' })
-  findPublished() {
-    return this.articlesService.findPublished();
+  @ApiOkResponse({
+    description:
+      'Returns published articles (paginated when page param is provided).',
+  })
+  findPublished(@Query() query: ArticlesQueryDto) {
+    return this.articlesService.findPublished(query);
   }
 
   @Get('upload-signature')
@@ -66,11 +71,14 @@ export class ArticlesController {
   @Get()
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'List all articles for editors and admins' })
-  @ApiOkResponse({ description: 'Returns all articles.' })
+  @ApiOkResponse({
+    description:
+      'Returns all articles (paginated when page param is provided).',
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.EDITOR)
-  findAll() {
-    return this.articlesService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.articlesService.findAll(query);
   }
 
   @Get(':id')
