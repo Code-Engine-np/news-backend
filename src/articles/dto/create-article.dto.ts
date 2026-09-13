@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   ValidateNested,
 } from 'class-validator';
 
@@ -27,6 +28,18 @@ export class CreateArticleDto {
   @ApiProperty({ description: 'Nepali title for the article' })
   @IsString()
   title!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'URL slug (auto-generated from title if omitted). ' +
+      'Lowercase, alphanumeric and hyphens only.',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'slug must be lowercase alphanumeric with hyphens, no leading/trailing hyphens',
+  })
+  slug?: string;
 
   @ApiProperty({ description: 'Nepali summary for the article' })
   @IsString()

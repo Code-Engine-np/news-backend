@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -12,11 +13,23 @@ import { CreateArticleDto } from '@/articles/dto/create-article.dto';
 import { NewsStatus } from '@/common/enums/news-status.enum';
 import { UsersService } from '@/users/users.service';
 import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
-import slug from 'slug';
+import { SlugService } from '@/articles/slug.service';
 import { CategoriesService } from '@/categories/categories.service';
 import { Image } from '@/entities';
 import { PaginationQueryDto } from '@/articles/dto/pagination-query.dto';
 import { ArticlesQueryDto } from '@/articles/dto/articles-query.dto';
+
+// Category slugs remain as simple ASCII-safe identifiers (not transliterated)
+// because they come from the nav config as pre-defined English-style keys.
+function slugifyCategory(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -35,10 +48,9 @@ export class ArticlesService {
     private readonly categoriesRepository: Repository<Category>,
 
     private readonly usersService: UsersService,
-
     private readonly dataSource: DataSource,
-
     private readonly categoriesService: CategoriesService,
+    private readonly slugService: SlugService,
   ) {}
 
   async findAll(
@@ -171,23 +183,29 @@ export class ArticlesService {
       where: { id: createArticleDto.categoryId },
     });
     if (!category) {
-      // if the category does not exist, create a new one with the provided name
-      const slugfied: string = slug(createArticleDto.category, {
-        lower: true,
-      });
+      const catSlug = slugifyCategory(createArticleDto.category);
       category = await this.categoriesService.create({
-        slug: slugfied,
+        slug: catSlug,
         name: createArticleDto.category,
       });
     }
 
-    const slugifiedTitle = slug(createArticleDto.title, { lower: true });
+    // Use editor-provided slug if given; otherwise auto-generate from title.
+    let articleSlug: string;
+    if (createArticleDto.slug) {
+      const base = this.slugService.sanitiseManualSlug(createArticleDto.slug);
+      if (!base) throw new BadRequestException('Invalid slug provided');
+      articleSlug = await this.slugService.ensureUnique(base);
+    } else {
+      articleSlug = await this.slugService.generateSlug(createArticleDto.title);
+    }
+
     return this.dataSource.transaction(async (manager) => {
       const article = manager.create(Article, {
         title: createArticleDto.title,
         summary: createArticleDto.summary,
         content: createArticleDto.content,
-        slug: slugifiedTitle,
+        slug: articleSlug,
         author,
         category,
         status: createArticleDto.status ?? NewsStatus.DRAFT,
@@ -232,25 +250,31 @@ export class ArticlesService {
     const {
       categoryId,
       category: categoryName,
+      slug: manualSlug,
       images,
       ...articleData
     } = updateArticleDto;
     Object.assign(article, articleData);
 
+    // Handle slug update: editor override takes priority, otherwise keep existing.
+    if (manualSlug !== undefined) {
+      const base = this.slugService.sanitiseManualSlug(manualSlug);
+      if (!base) throw new BadRequestException('Invalid slug provided');
+      article.slug = await this.slugService.ensureUnique(base, id);
+    }
+
     if (categoryId) {
       const category = await this.categoriesRepository.findOne({
         where: { id: categoryId },
       });
-
       if (!category) {
         throw new NotFoundException('Category not found');
       }
-
       article.category = category;
     } else if (categoryName) {
-      const slugified = slug(categoryName, { lower: true });
+      const catSlug = slugifyCategory(categoryName);
       article.category = await this.categoriesService.create({
-        slug: slugified,
+        slug: catSlug,
         name: categoryName,
       });
     }

@@ -5,6 +5,7 @@ import { Category, Image, Article } from '@/entities';
 import { UsersModule } from '@/users/users.module';
 import { ArticlesController } from '@/articles/articles.controller';
 import { ArticlesService } from '@/articles/articles.service';
+import { SlugService } from '@/articles/slug.service';
 import { CategoriesModule } from '@/categories/categories.module';
 import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 
@@ -17,6 +18,6 @@ import { CloudinaryService } from '@/cloudinary/cloudinary.service';
     JwtModule.register({}),
   ],
   controllers: [ArticlesController],
-  providers: [ArticlesService, CloudinaryService],
+  providers: [ArticlesService, SlugService, CloudinaryService],
 })
 export class ArticlesModule {}
