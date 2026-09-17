@@ -35,6 +35,9 @@ export class Article {
   @Column({ type: 'enum', enum: NewsStatus, default: NewsStatus.DRAFT })
   status!: NewsStatus;
 
+  @Column({ type: 'boolean', default: false })
+  isBreaking!: boolean;
+
   @ManyToOne(() => User, (author) => author.articles, {
     eager: true,
     nullable: false,

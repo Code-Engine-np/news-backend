@@ -75,7 +75,9 @@ export class ContactService {
     });
 
     if (error) {
-      this.logger.error(`Resend failed to send contact email: ${error.message}`);
+      this.logger.error(
+        `Resend failed to send contact email: ${error.message}`,
+      );
       throw new InternalServerErrorException(
         'Failed to send your message. Please try again later.',
       );
