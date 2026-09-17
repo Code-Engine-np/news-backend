@@ -64,6 +64,7 @@ export class ArticlesService {
         title: true,
         summary: true,
         status: true,
+        isBreaking: true,
         category: true,
         author: { id: true, fullName: true },
         createdAt: true,
@@ -102,6 +103,7 @@ export class ArticlesService {
         title: true,
         images: true,
         summary: true,
+        isBreaking: true,
         createdAt: true,
         updatedAt: true,
         author: { id: true, fullName: true },
@@ -209,6 +211,7 @@ export class ArticlesService {
         author,
         category,
         status: createArticleDto.status ?? NewsStatus.DRAFT,
+        isBreaking: createArticleDto.isBreaking ?? false,
       });
       const savedArticle = await manager.save(article);
 

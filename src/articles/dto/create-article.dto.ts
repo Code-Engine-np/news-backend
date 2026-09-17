@@ -4,6 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { plainToInstance, Transform } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsOptional,
   IsString,
@@ -74,6 +75,11 @@ export class CreateArticleDto {
   @IsOptional()
   @IsEnum(NewsStatus)
   status?: NewsStatus;
+
+  @ApiPropertyOptional({ description: 'Pin this article as a breaking news item' })
+  @IsOptional()
+  @IsBoolean()
+  isBreaking?: boolean;
 
   @ApiPropertyOptional({
     description: 'Tag IDs to attach to the article',
